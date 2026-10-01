@@ -228,7 +228,7 @@ Read [contributing](CONTRIBUTING.en.md), use synthetic data, and exclude credent
 
 ## Scope
 
-Baseline **V3.6**, documentation **2026-10-01**. A local learning/research lab with synthetic data and registered tools; not a production guarantee.
+A local learning/research lab with synthetic data and registered tools; not a production guarantee.
 
 Only explicitly integrated paths are protected. Bound tool sessions receive action-budget checks. Semantic rewrites, long autonomous tasks, third-party drift, and multi-model cooperation remain incompletely validated. Optional cloud/model/MCP settings create external connections; GitHub writes are real.
 
