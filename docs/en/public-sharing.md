@@ -25,4 +25,4 @@ Ignore files help Git/build exclusion, but manual folder packaging still require
 
 Start from the [quick start](../../README.md#quick-start) with your own random credentials. Cloud models/Judge/third-party MCP are explicit opt-ins; real GitHub writes need a dedicated synthetic repo, separate PAT and concrete human approval. Contributions preserve failed/inconclusive outcomes and versions rather than copying business text or claiming old results as a new run; see [contribution guide](../../CONTRIBUTING.en.md).
 
-The current file set has no `LICENSE`. The publisher needs to choose a license to specify use/modification/distribution rights.
+The project is released under the [MIT License](../../LICENSE). Retain its copyright and permission notices when distributing copies.

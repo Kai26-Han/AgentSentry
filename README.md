@@ -234,4 +234,6 @@ Only explicitly integrated paths are protected. Bound tool sessions receive acti
 
 [API index](docs/en/api-reference.md) · [Sharing/privacy](docs/en/public-sharing.md) · [Risk evidence](docs/en/risk-coverage.md)
 
-No `LICENSE` is included yet; the maintainer must choose one to clarify use, modification, and distribution rights.
+## License
+
+AgentSentry is released under the [MIT License](LICENSE).

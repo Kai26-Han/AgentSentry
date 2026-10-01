@@ -267,4 +267,6 @@ Judge 分数只评价它实际收到的单条事件。样本页显示所选提�
 
 [接口索引](docs/api-reference.md) · [隐私与公开文件约定](docs/public-sharing.md) · [完整风险证据](docs/risk-coverage.md)
 
-当前文件集尚未包含 `LICENSE`；具体使用、修改和分发授权需由维护者选择许可证后明确。
+## 许可证
+
+AgentSentry 采用 [MIT 许可证](LICENSE)。

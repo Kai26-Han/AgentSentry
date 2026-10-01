@@ -58,4 +58,4 @@ Use --write only after changing its source/layout. English and Chinese docs stay
 
 Separate scripted boundaries from model behavior, draft from displayed contamination, legal from prohibited effects. Do not loosen identity, cross-tenant, credential, or audit-commit boundaries to improve small-sample scores. Record baseline, suggestions, human decision, new version, and held-out results. No automatic publication or approval of attacks. Sources, seals, and framework IDs do not establish truth or category-wide protection.
 
-See [regressions](README.md#regression-checks), [experiments](docs/en/learning/experiment-index.md), [UI languages](docs/en/web-language.md), and [sharing rules](docs/en/public-sharing.md). No LICENSE is included yet; do not assume or choose authorization on the maintainer's behalf.
+See [regressions](README.md#regression-checks), [experiments](docs/en/learning/experiment-index.md), [UI languages](docs/en/web-language.md), and [sharing rules](docs/en/public-sharing.md). The project is released under the [MIT License](LICENSE).

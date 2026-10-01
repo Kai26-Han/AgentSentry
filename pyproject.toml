@@ -6,6 +6,8 @@ build-backend = "hatchling.build"
 name = "agentsentry"
 version = "0.3.0"
 description = "A local Agent security gateway and learning lab"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115,<1",
