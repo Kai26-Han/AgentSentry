@@ -2,6 +2,10 @@
 
 [English](#) · [中文](README.zh-CN.md)
 
+<p align="center">
+  <img src="images/logo.png" width="180" alt="AgentSentry puffin and shield logo">
+</p>
+
 ### Make Agent security visible, runnable, and testable.
 
 **A self-hosted Agent security learning lab.** Explore how tool authorization, prompt injection, output and memory contamination, sensitive data flow, MCP supply chains, failure recovery, and Agent delegation work together. Run experiments and inspect both the protection and its limits.

@@ -2,6 +2,10 @@
 
 [中文](#) · [English](README.md)
 
+<p align="center">
+  <img src="images/logo.png" width="180" alt="AgentSentry 海鹦与盾牌 Logo">
+</p>
+
 ### 把 Agent 安全变成看得见、跑得通、能验证的学习实践。
 
 **一个本机自托管的 Agent 安全实验平台。** 从工具授权、提示词注入、输出与记忆污染，到敏感数据流、MCP 供应链、故障恢复和 Agent 间委托，在同一个项目里理解它们如何协作，并亲手验证防护的效果与边界。

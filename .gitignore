@@ -38,3 +38,7 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Logo 探索稿留在本机；正式 Logo 为 images/logo.png。
+images/logo-options*/
+images/logo-puffin*.png
