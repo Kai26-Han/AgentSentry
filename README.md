@@ -1,8 +1,7 @@
-<p align="center">
-  <img src="images/logo.png" width="120" alt="AgentSentry puffin and shield logo">
-</p>
-
-<h1 align="center">AgentSentry</h1>
+<h1 align="center">
+  <img src="images/logo.png" width="64" height="64" align="absmiddle" alt="AgentSentry puffin and shield logo">
+  AgentSentry
+</h1>
 
 <div align="center">
 

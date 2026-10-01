@@ -1,8 +1,7 @@
-<p align="center">
-  <img src="images/logo.png" width="120" alt="AgentSentry 海鹦与盾牌 Logo">
-</p>
-
-<h1 align="center">AgentSentry</h1>
+<h1 align="center">
+  <img src="images/logo.png" width="64" height="64" align="absmiddle" alt="AgentSentry 海鹦与盾牌 Logo">
+  AgentSentry
+</h1>
 
 <div align="center">
 

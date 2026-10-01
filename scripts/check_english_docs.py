@@ -221,7 +221,10 @@ def validate_documents():
         text = p.read_text(encoding='utf-8')
         has_title = text.startswith('# ') or (
             p == ROOT / 'README.md'
-            and '<h1 align="center">AgentSentry</h1>' in text[:1000]
+            and re.search(
+                r'<h1 align="center">\s*(?:<img\b[^>]*>\s*)?AgentSentry\s*</h1>',
+                text[:1000],
+            ) is not None
         )
         require(has_title and '[English](#) · [中文](' in text, f'Missing title/language link: {p}')
         for m in re.finditer(r'(!?)\[([^\]\n]*)\]\(([^)\n]+)\)', text):
