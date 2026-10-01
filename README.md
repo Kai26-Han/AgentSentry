@@ -1,10 +1,14 @@
-# AgentSentry
+<p align="center">
+  <img src="images/logo.png" width="120" alt="AgentSentry puffin and shield logo">
+</p>
+
+<h1 align="center">AgentSentry</h1>
+
+<div align="center">
 
 [English](#) · [中文](README.zh-CN.md)
 
-<p align="center">
-  <img src="images/logo.png" width="180" alt="AgentSentry puffin and shield logo">
-</p>
+</div>
 
 ### Make Agent security visible, runnable, and testable.
 

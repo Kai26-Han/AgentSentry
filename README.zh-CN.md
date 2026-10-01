@@ -1,10 +1,14 @@
-# AgentSentry
+<p align="center">
+  <img src="images/logo.png" width="120" alt="AgentSentry 海鹦与盾牌 Logo">
+</p>
+
+<h1 align="center">AgentSentry</h1>
+
+<div align="center">
 
 [中文](#) · [English](README.md)
 
-<p align="center">
-  <img src="images/logo.png" width="180" alt="AgentSentry 海鹦与盾牌 Logo">
-</p>
+</div>
 
 ### 把 Agent 安全变成看得见、跑得通、能验证的学习实践。
 

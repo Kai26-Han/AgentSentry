@@ -219,7 +219,11 @@ def validate_documents():
     errors, count = [], 0
     for p in sorted(actual):
         text = p.read_text(encoding='utf-8')
-        require(text.startswith('# ') and '[English](#) · [中文](' in text, f'Missing title/language link: {p}')
+        has_title = text.startswith('# ') or (
+            p == ROOT / 'README.md'
+            and '<h1 align="center">AgentSentry</h1>' in text[:1000]
+        )
+        require(has_title and '[English](#) · [中文](' in text, f'Missing title/language link: {p}')
         for m in re.finditer(r'(!?)\[([^\]\n]*)\]\(([^)\n]+)\)', text):
             raw = m[3]; u = urlparse(raw)
             if u.scheme or u.netloc or raw == '#':
