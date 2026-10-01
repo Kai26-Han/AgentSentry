@@ -1,0 +1,20 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("Judge 运行设置") }}{% endblock %}
+{% block title_text %}{{ _("Judge 运行设置") }}{% endblock %}
+{% block content %}
+<h1>{{ _("Judge 运行设置") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<p class="notice">{{ _("这里控制日常审计事件使用的 Judge；安全网关的同步放行、拒绝和审批不受影响。已创建的事件继续使用各自记录的 Judge，切换只影响后续新事件。") }}</p>
+{% if update_status == 'updated' %}<p>{{ _("运行设置已更新。") }}</p>{% elif update_status == 'rejected' %}<p class="danger">{{ _("切换未生效。请刷新页面，确认提供方已配置后重试。") }}</p>{% endif %}
+<section><h2>{{ _("当前设置") }}</h2>
+<p>{{ _("提供方：") }}<b>{{ config.provider }}</b> {{ _("· 配置修订：") }}{{ config.revision }} {{ _("· 最近更新：") }}{{ config.updated_at }}</p>
+{% if selected %}<p>{{ _("模型：") }}<code>{{ selected.model }}</code> {{ _("· 数据目的地：") }}<code>{{ selected.destination }}</code></p>{% else %}<p class="danger">{{ _("当前提供方在 Web 中未配置；新事件仍会记录该选择，但 Worker 无法完成评判。") }}</p>{% endif %}
+<form method="post" action="/dashboard/judge-runtime"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="expected_revision" value="{{ config.revision }}">
+<label>{{ _("切换到") }} <select name="provider">{% for choice in choices %}<option value="{{ choice.id }}" {% if choice.id == config.provider %}selected{% endif %}>{{ (choice.label) | ui }} · {{ choice.model }} · {{ choice.destination | ui }}</option>{% endfor %}</select></label><button>{{ _("保存运行设置") }}</button></form>
+<p class="small">{{ _("云端 Judge 会按现有脱敏规则接收后续审计事件。页面只展示非密钥配置；若 Worker 缺少凭据或服务不可用，事件会失败并保留原选择，不会自动改用其他模型。") }}</p></section>
+<section><h2>{{ _("处理状态") }}</h2><p>Outbox：{% for status,count in outbox_counts.items() %}{{ status }} {{ count }}　{% else %}{{ _("暂无事件") }}{% endfor %}</p>
+<p>{{ _("最近实际完成：") }}{% if last_result %}{{ last_result.provider }} / {{ last_result.model_version }} · {{ last_result.created_at }}{% else %}{{ _("暂无") }}{% endif %}</p>
+{% if latest_failure %}<p class="danger">{{ _("最近失败：") }}{{ latest_failure.updated_at }} · {{ failure_summary }}</p>{% endif %}
+<p><a href="/dashboard/audit">{{ _("查看审计与 Judge 结果") }}</a> · <a href="/dashboard/judge-samples">{{ _("用合成样本单独测试提供方") }}</a></p></section>
+<section><h2>{{ _("切换历史") }}</h2><table><tr><th>{{ _("时间") }}</th><th>{{ _("原提供方") }}</th><th>{{ _("新提供方") }}</th><th>{{ _("修订") }}</th><th>{{ _("操作身份") }}</th></tr>
+{% for row in changes %}<tr><td>{{ row.changed_at }}</td><td>{{ (row.previous_provider or '首次配置') | ui }}</td><td>{{ row.provider }}</td><td>{{ row.revision }}</td><td>{{ row.actor }}</td></tr>{% else %}<tr><td colspan="5">{{ _("暂无记录") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

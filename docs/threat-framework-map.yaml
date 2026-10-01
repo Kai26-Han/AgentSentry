@@ -1,0 +1,711 @@
+schema_version: 1
+mapping_version: '1.9.0'
+frameworks:
+  owasp:
+    edition: Agentic Top 10 2026
+    url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+  atlas:
+    release: '2026.08'
+    checked_on: '2026-09-29'
+    source_url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml
+
+# 名称与编号逐项核对 MITRE 官方 v2026.08 数据；链接固定到该版本的定义行。
+atlas_techniques:
+  - id: AML.T0051.001
+    name: Indirect
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L2599
+  - id: AML.T0053
+    name: AI Agent Tool Invocation
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L2783
+  - id: AML.T0080
+    name: AI Agent Context Poisoning
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L3507
+  - id: AML.T0080.000
+    name: Memory
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L3528
+  - id: AML.T0086
+    name: Exfiltration via AI Agent Tool Invocation
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L3793
+  - id: AML.T0099
+    name: AI Agent Tool Data Poisoning
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L4217
+  - id: AML.T0110.000
+    name: Definition and Instructions
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L4487
+  - id: AML.T0110.001
+    name: Implementation
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L4525
+  - id: AML.T0110.002
+    name: Runtime Response
+    url: https://github.com/mitre-atlas/atlas-data/blob/v2026.08/dist/v6/ATLAS-2026.08.yaml#L4559
+
+categories:
+  - id: ASI01
+    name: Agent Goal Hijack
+    applicability: 当前适用
+    threat_ids: [TH-001, TH-002, TH-012]
+    note: 文档与 MCP 卡片可影响示例 Agent 的任务选择或回答；已知合成恶意文档的读取单独作为来源暴露线索，不推断模型已服从。
+  - id: ASI02
+    name: Tool Misuse & Exploitation
+    applicability: 当前适用
+    threat_ids: [TH-002, TH-006, TH-007, TH-009, TH-013]
+    note: 固定工具可被诱导读取、写入或模拟外发；模型发送出口按 Agent 可触发的外部动作纳入，结论限于显式接入路径。
+  - id: ASI03
+    name: Identity & Privilege Abuse
+    applicability: 当前适用
+    threat_ids: [TH-015, TH-003]
+    note: 租户身份与资源范围有验证；未覆盖外部身份提供方或其他 Agent。
+  - id: ASI04
+    name: Agentic Supply Chain Vulnerabilities
+    applicability: 当前适用
+    threat_ids: [TH-010]
+    note: 固定远程 MCP HTTPS 出口已接入；受控本机 TLS/OAuth 测试验证清单和身份边界，GitHub 官方 MCP 已完成固定只读及一次人工审批写入。真实链路接通不证明第三方内部实现、响应语义或长期供应链变化安全。
+  - id: ASI05
+    name: Unexpected Code Execution
+    applicability: 当前适用
+    threat_ids: [TH-009]
+    note: 默认租户有受限 Shell 演示；其容器隔离不能视为生产级安全沙箱。
+  - id: ASI06
+    name: Memory & Context Poisoning
+    applicability: 当前适用
+    threat_ids: [TH-004, TH-005, TH-015]
+    note: 已有跨会话污染和存储篡改样本，语义改写及应用密钥同时失陷仍未覆盖。
+  - id: ASI07
+    name: Insecure Inter-Agent Communication
+    applicability: 当前适用
+    threat_ids: [TH-015]
+    note: 新增本机单跳只读协作身份、封签消息和缩减权限；跨主机、多跳及语义真实性尚未验证。
+  - id: ASI08
+    name: Cascading Failures
+    applicability: 当前适用
+    threat_ids: [TH-014]
+    note: 已加入单 Agent 服务链的熔断、队列退避与故障隔离实验；跨 Agent 及真实分布式连锁故障仍未验证。
+  - id: ASI09
+    name: Human-Agent Trust Exploitation
+    applicability: 当前适用
+    threat_ids: [TH-001, TH-008]
+    note: 审批事实卡和回答污染均涉及人对 Agent 表述的信任；自动化页面测试不能证明管理员不会受骗。
+  - id: ASI10
+    name: Rogue Agents
+    applicability: 尚待验证
+    threat_ids: [TH-011, TH-013]
+    note: 已对单 Agent 的调用循环和写入预算作边界测试；没有攻击者输入时的持续自主越界行为仍未验证。
+
+# 只匹配已提交的审计元数据。命中表示观察到线索，不表示攻击成功。
+runtime_signals:
+  - id: delegation_result_poison
+    title: 协作结果含明显指令或伪造授权，被展示前阻断
+    event_type: delegation_decision
+    when: {phase: result, effect: deny, finding: delegation_result_instruction}
+    threat_ids: [TH-015]
+  - id: delegation_scope_tamper
+    title: 委托封签与消息不一致
+    event_type: delegation_decision
+    when: {effect: deny, finding: delegation_message_tampered}
+    threat_ids: [TH-015]
+  - id: dependency_circuit_opened
+    title: 连续依赖故障触发熔断
+    event_type: dependency_fault
+    when: {status: open, finding: dependency_circuit_open}
+    threat_ids: [TH-014]
+  - id: queue_processing_exhausted
+    title: 异步处理租约反复失效并停止重试
+    event_type: dependency_fault
+    when: {status: attempts_exhausted, finding: queue_attempts_exhausted}
+    threat_ids: [TH-014]
+  - id: action_chain_tool_loop
+    title: 会话工具提案超出预算
+    event_type: action_chain_decision
+    when: {phase: submit, effect: deny, finding: tool_budget_exceeded}
+    threat_ids: [TH-013]
+  - id: action_chain_write_loop
+    title: 会话或 Agent 写入提案超出预算
+    event_type: action_chain_decision
+    when: {phase: submit, effect: deny, finding: session_write_budget_exceeded}
+    threat_ids: [TH-013]
+  - id: action_chain_agent_write_loop
+    title: Agent 跨会话写入提案超出预算
+    event_type: action_chain_decision
+    when: {phase: submit, effect: deny, finding: agent_write_budget_exceeded}
+    threat_ids: [TH-013]
+  - id: action_chain_probe
+    title: 连续探测不同无权资源
+    event_type: action_chain_decision
+    when: {phase: submit, effect: deny, finding: denied_resource_probe}
+    threat_ids: [TH-013]
+  - id: action_chain_model_loop
+    title: 会话模型请求超出预算
+    event_type: action_chain_decision
+    when: {phase: 'model:task', effect: deny, finding: model_budget_exceeded}
+    threat_ids: [TH-013]
+  - id: remote_mcp_manifest_drift
+    title: 远程 MCP 已登记工具清单发生变化
+    event_type: tool_result
+    when: {status: failed, reason: remote_mcp_manifest_drift}
+    threat_ids: [TH-010]
+  - id: remote_mcp_profile_drift
+    title: 远程 MCP 已批准接入身份发生变化
+    event_type: tool_result
+    when: {status: failed, reason: remote_mcp_profile_drift}
+    threat_ids: [TH-010]
+  - id: remote_mcp_behavior_drift
+    title: 合成 MCP 服务只读行为探针发生变化
+    event_type: tool_result
+    when: {status: failed, reason: remote_mcp_behavior_drift}
+    threat_ids: [TH-010]
+  - id: remote_mcp_observed_change
+    title: 管理员或调用观察到远程 MCP 接入变化
+    event_type: mcp_profile_observed
+    when: {reason: remote_mcp_manifest_drift}
+    threat_ids: [TH-010]
+  - id: remote_mcp_observed_identity_change
+    title: 管理员观察到远程 MCP 端点身份变化
+    event_type: mcp_profile_observed
+    when: {reason: remote_mcp_profile_drift}
+    threat_ids: [TH-010]
+  - id: remote_mcp_canary_incident
+    title: 管理员或调用观察到 MCP 行为探针异常
+    event_type: mcp_supply_incident
+    when: {reason: remote_mcp_behavior_drift}
+    threat_ids: [TH-010]
+  - id: injected_fixture_delivered
+    title: 已知合成注入文档实际返回
+    event_type: tool_result
+    when: {status: completed, fixture_document: injected-guide}
+    threat_ids: [TH-012]
+  - id: answer_instruction_echo
+    title: 来源输出指令进入回答
+    event_type: data_flow_decision
+    when: {sink: answer, effect: block, finding: source_instruction_in_answer}
+    threat_ids: [TH-001]
+  - id: answer_action_payload_echo
+    title: 来源动作载荷进入回答
+    event_type: data_flow_decision
+    when: {sink: answer, effect: block, finding: source_action_payload_in_answer}
+    threat_ids: [TH-001]
+  - id: mcp_action_inducement
+    title: MCP 卡片诱导工具动作
+    event_type: goal_assessment
+    when: {phase: submit, status: suspected, finding: source_action_match, source_tool: mcp_lookup_card}
+    threat_ids: [TH-002]
+  - id: invalid_session_binding
+    title: 无效会话身份尝试
+    event_type: runtime_decision
+    when: {effect: deny, finding: session_binding_invalid}
+    threat_ids: [TH-003]
+  - id: memory_instruction_quarantined
+    title: 记忆指令被隔离
+    event_type: data_flow_decision
+    when: {sink: memory, effect: quarantined, finding: cross_session_command}
+    threat_ids: [TH-004]
+  - id: memory_integrity_failure
+    title: 记忆或来源审核完整性异常
+    event_type: memory_integrity
+    when: {reason: seal_mismatch}
+    threat_ids: [TH-005]
+  - id: private_external_attempt
+    title: 私有来源后的模拟外发尝试
+    event_type: data_flow_decision
+    when: {sink: 'tool:submit', destination: send_external, effect: deny, finding: external_after_private}
+    threat_ids: [TH-006]
+  - id: restricted_answer_blocked
+    title: 受限来源后的回答被阻断
+    event_type: data_flow_decision
+    when: {sink: answer, effect: block, finding: restricted_source_answer}
+    threat_ids: [TH-006]
+  - id: remote_model_sensitive_block
+    title: 远程模型敏感上下文被拒绝
+    event_type: data_flow_decision
+    when: {sink: model, effect: deny, finding: model_remote_sensitive}
+    threat_ids: [TH-007]
+  - id: approval_authority_spoof
+    title: 来源伪造审批权威
+    event_type: goal_assessment
+    when: {phase: submit, status: suspected, finding: source_authority_spoof}
+    threat_ids: [TH-008]
+  - id: approval_argument_claim
+    title: 工具参数声称已经批准
+    event_type: goal_assessment
+    when: {phase: submit, status: suspected, finding: argument_approval_claim}
+    threat_ids: [TH-008]
+
+threats:
+  - id: TH-014
+    title: 依赖故障、过载与重试放大沿单 Agent 服务链传播
+    entry: 显式接入网关的 MCP、沙箱和异步 Judge／通知依赖
+    asset: 安全检查可用性、审计完整性和副作用状态
+    scope: 单 Agent、本机显式接入服务链；临时数据库与受控故障替身
+    status: 部分验证
+    owasp: [ASI08]
+    atlas: []
+    atlas_note: 当前证据验证可用性故障与恢复边界，没有核实攻击者使用特定 ATLAS 技术，不强行映射对手技术。
+    controls:
+      - path: src/agentsentry/resilience.py
+        summary: 租户内依赖熔断、并发租约、异步代次保护与安全重试
+      - path: src/agentsentry/dispatcher.py
+        summary: 分租户、分阶段继续投递并持久化退避
+      - path: docker-compose.yml
+        summary: Judge 与通知使用独立队列及 Worker
+    evidence:
+      - kind: 固定重放
+        corpus: fault-lab-v1
+        cases: [F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14, F15, F16, F17, F18, N01, N02, N03, N04]
+        path: docs/fault-propagation.md
+        summary: 受控替身验证拒绝、未知结果、熔断恢复、退避、重复任务、迟到结果和本地正常对照
+      - kind: 单元测试
+        path: tests/test_resilience.py
+        summary: 额外验证租户隔离、租约过期、处理崩溃次数上限和退避不饿死就绪记录
+      - kind: 现场演练
+        path: docs/fault-propagation.md
+        summary: 临时 PostgreSQL schema 核对真实并发锁；真实 Redis 专属队列验证发布失败、无 Worker 积压、临时 Worker 启动后恢复和原事件去重，不停止日常服务
+    limitation: 共用主机、数据库与 Redis 仍有全局故障域；不是严格租户资源配额，不声称防住第三方长期过载、所有连锁故障或跨 Agent 故障。
+  - id: TH-001
+    title: 低信任材料污染最终回答
+    entry: 文档与 MCP 卡片的实际读取结果
+    asset: 用户看到的最终回答与对 Agent 的信任
+    scope: 显式接入的示例 Agent；原固定 A12 曾发生展示污染，修复后固定重放已阻断；本地模型 A06 三次未触发污染
+    status: 部分验证
+    owasp: [ASI01, ASI09]
+    atlas: [AML.T0099, AML.T0051.001]
+    controls:
+      - path: src/agentsentry/output_safety.py
+        summary: 回答展示前检查
+      - path: src/agentsentry/output_instructions.py
+        summary: 从实际读取来源提取动作载荷并与回答比对
+      - path: src/agentsentry/goal_analysis.py
+        summary: 目标偏移辅助线索
+    evidence:
+      - kind: 固定重放
+        corpus: goal-lab-v1
+        cases: [A12]
+        path: docs/cases/injection-and-output.md
+        summary: 危险外发待审批后被拒；回答草稿中的标记进入实际可展示回答
+      - kind: 真实模型
+        corpus: goal-lab-v1
+        cases: [A06]
+        path: docs/cases/injection-and-output.md
+        summary: 本地模型三次未复现展示污染，不能抵消固定样本暴露的缺口
+      - kind: 固定重放
+        corpus: goal-lab-v1
+        cases: [A12]
+        path: docs/cases/injection-and-output.md
+        summary: 修复后两次固定运行均阻断展示，外发副作用和审计缺失均为零；历史污染记录保留
+      - kind: 单元测试
+        path: tests/test_output_safety.py
+        summary: 来源绑定、正常引用、诱饵命令、改写语句及可还原编码通过回归
+      - kind: 真实模型
+        corpus: goal-lab-v1
+        cases: [A06]
+        path: docs/cases/injection-and-output.md
+        summary: 本地 qwen3:0.6b 三次未产生标记污染或危险工具尝试；该轨不能单独证明修复规则有效
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [OUTPUT-INSTRUCTION, OUTPUT-MARKER, OUTPUT-QUOTE, OUTPUT-PUBLIC]
+        path: docs/cases/boundary-validation.md
+        summary: 明确覆盖命令的直接复述由 warn 收紧为 block，带说明引用与公开资料正常；修复后两轮一致
+    limitation: 仅对可解析的明确动作命令与不透明载荷奏效；语义改写、非透明接入及真实模型触发此规则的效果仍是剩余边界。
+
+  - id: TH-002
+    title: MCP 卡片诱导越权工具调用
+    entry: 本地 MCP Server 返回的合成卡片数据
+    asset: 工具副作用与其他卡片资源
+    scope: 固定本地 MCP stdio 适配器与已登记工具，不包括任意远程 MCP
+    status: 部分验证
+    owasp: [ASI01, ASI02]
+    atlas: [AML.T0099, AML.T0053]
+    controls:
+      - path: src/agentsentry/mcp_backend.py
+        summary: 固定上游工具与结果结构
+      - path: src/agentsentry/service.py
+        summary: 网关权限、策略与审批
+    evidence:
+      - kind: 固定重放
+        corpus: attack/v2.2.0
+        cases: [M01, M02, M03]
+        path: docs/cases/injection-and-output.md
+        summary: 固定提案验证卡片诱导写入和越权读取的网关边界
+      - kind: 真实模型
+        corpus: attack/v2.2.0
+        cases: [M01, M02, M03]
+        path: docs/cases/injection-and-output.md
+        summary: 三条 MCP 攻击的本地模型未提出危险工具调用；真实调用后的阻断率无分母
+      - kind: 单元测试
+        path: tests/test_mcp.py
+        summary: 未登记工具、非法结果和审批前写入等路径有回归测试
+    limitation: 固定提案只验证进入网关后的决定；真实模型是否提出相同危险调用须独立统计。
+
+  - id: TH-003
+    title: 跨租户或越资源范围使用 Agent 权限
+    entry: 工具调用中的租户身份、权限令牌与资源参数
+    asset: 其他租户数据和未授权资源
+    scope: 示例 Agent、固定工具、当前租户 schema 与限时权限
+    status: 范围内已验证
+    owasp: [ASI03]
+    atlas: [AML.T0053]
+    controls:
+      - path: src/agentsentry/capability.py
+        summary: 租户绑定的原子权限校验
+      - path: src/agentsentry/service.py
+        summary: 类型化资源与调用身份核查
+    evidence:
+      - kind: 固定重放
+        corpus: attack/v2.2.0
+        cases: [B05, B07]
+        path: docs/cases/injection-and-output.md
+        summary: 跨租户令牌和错误资源范围的调用未产生越权副作用
+      - kind: 单元测试
+        path: tests/test_v2_tenants.py
+        summary: 租户间文档、调用、授权与面板隔离有回归测试
+    limitation: 不证明通用 Agent、外部身份提供方或直接绕过适配层的调用安全。
+
+  - id: TH-004
+    title: 恶意来源写入跨会话长期记忆
+    entry: 文档与 MCP 卡片进入自动记忆候选
+    asset: 后续正常会话的模型上下文和回答
+    scope: 示例 Agent 自动记忆的写入、隔离与读取链路
+    status: 部分验证
+    owasp: [ASI06]
+    atlas: [AML.T0080.000, AML.T0051.001]
+    controls:
+      - path: src/agentsentry/memory.py
+        summary: 来源核查、隔离与撤销
+      - path: src/agentsentry/memory_integrity.py
+        summary: 记忆完整性核查
+    evidence:
+      - kind: 固定重放
+        corpus: memory-security/v2.6.0
+        cases: [A01, A02, A07, A08]
+        path: docs/cases/memory-poisoning.md
+        summary: 明确的角色伪造、持续指令和输出污染样本被检查
+      - kind: 单元测试
+        path: tests/test_memory.py
+        summary: 隔离、撤销和读取边界有回归测试
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [MEMORY-UNREVIEWED, MEMORY-FALSE-CANDIDATE, MEMORY-REVOKE, MEMORY-RESUMMARY, MEMORY-SAFE]
+        path: docs/cases/boundary-validation.md
+        summary: 真实 PostgreSQL 三会话验证未审核、摘要替换、撤销及再次摘要；两轮一致，另列本地模型 6 攻击和 6 正常两轮实验
+    limitation: 未命中的语义改写、已经进入进行中会话的记忆不由撤销追回。
+
+  - id: TH-005
+    title: 存储中记忆或来源审核记录被篡改
+    entry: 对租户记忆表或审核状态的直接修改
+    asset: 长期记忆文字、激活状态和可信来源记录
+    scope: 攻击者可改数据库行但未同时取得应用签名密钥
+    status: 范围内已验证
+    owasp: [ASI06]
+    atlas: [AML.T0080]
+    controls:
+      - path: src/agentsentry/memory_integrity.py
+        summary: 租户绑定的完整性签名
+      - path: src/agentsentry/memory.py
+        summary: 读取前核验与异常隔离
+    evidence:
+      - kind: 固定重放
+        corpus: memory-security/v2.6.0
+        cases: [A09, A10, A11, A12]
+        path: docs/cases/memory-poisoning.md
+        summary: 文字、状态、来源审核和签名删除的篡改被识别
+    limitation: 签名密钥与应用进程同时失陷时，本完整性边界不能成立。
+
+  - id: TH-006
+    title: 私有资料通过写入工具、回答或模拟外发泄露
+    entry: 读取私有内容后调用本地任务、MCP 笔记、模拟外发或输出展示检查
+    asset: 私有文档内容及租户数据边界
+    scope: 固定合成资料、网关登记工具和展示接口；受限来源会话的自由文本展示已收紧，外发仍仅写本地模拟收件箱
+    status: 部分验证
+    owasp: [ASI02]
+    atlas: [AML.T0086]
+    controls:
+      - path: src/agentsentry/data_flow.py
+        summary: 敏感来源到工具出口的同步检查
+      - path: src/agentsentry/service.py
+        summary: 执行前审批与原参数重查
+      - path: src/agentsentry/output_safety.py
+        summary: 展示前对已读私有、未知或秘密来源的自由文本回答整体阻断；同会话正常回答也可能被阻断
+    evidence:
+      - kind: 固定重放
+        corpus: data-flow-cases-v1
+        cases: [A08, A09, A10, A13, A15]
+        path: docs/cases/private-data-leakage.md
+        summary: 模拟外发被拒，敏感写入被拒或升级审批，禁止副作用为零
+      - kind: 固定重放
+        corpus: calibration-cases-v1
+        cases: [N07, N08]
+        path: docs/cases/injection-and-output.md
+        summary: 两种正常任务受限，误拦取舍尚未安全放宽
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [OUTPUT-WORDS-CN, OUTPUT-WORDS-EN, OUTPUT-ARITHMETIC, OUTPUT-COPY, OUTPUT-UNRELATED]
+        path: docs/cases/boundary-validation.md
+        summary: 两轮均确认数词和算式改写可展示；同会话模拟外发拒绝，远程模型固定配置判定拒绝且未发送远程请求；不是模型实际生成这些草稿的证明
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [OUTPUT-WORDS-CN, OUTPUT-WORDS-EN, OUTPUT-ARITHMETIC, OUTPUT-UNRELATED, OUTPUT-PUBLIC, OUTPUT-QUOTE]
+        path: docs/cases/private-data-leakage.md
+        summary: 修复后两轮真实网关验证三种改写均在展示前阻断；公开回答仍可展示，正常无关回答也被阻断并计为误拦
+      - kind: 固定重放
+        corpus: output-samples-v5
+        cases: [O31, O32, O33, O34, O35]
+        path: tests/test_output_safety.py
+        summary: 覆盖私有语义改写、公开正常对照与私有来源正常任务受阻
+      - kind: 固定重放
+        corpus: data-flow-cases-v2
+        cases: [A20]
+        path: tests/test_data_flow.py
+        summary: 受限来源回答阻断后，记忆摘要未启动；历史 v1 结果仍保留
+    limitation: 无真实网络外发；已读受限来源会话的正常自由回答受阻，尚无可核验展示模板或人工放行流程；错误来源分级与未接入路径仍可能泄露。
+
+  - id: TH-007
+    title: 私有内容进入未经批准的远程模型请求
+    entry: 示例 Agent 的模型请求发送前
+    asset: 私有资料、个人信息和凭据
+    scope: 已登记模型目的地与显式接入的模型发送函数
+    status: 部分验证
+    owasp: [ASI02]
+    atlas: []
+    atlas_note: ATLAS 的“Exfiltration via AI Inference API”主要描述从模型接口抽取训练数据，不等同于本场景把私有上下文发送给远程服务。
+    controls:
+      - path: src/agentsentry/data_flow.py
+        summary: 模型出口分类与同步拒绝
+    evidence:
+      - kind: 固定重放
+        corpus: data-flow-cases-v1
+        cases: [A01, A02, A03, A04, A05, A06]
+        path: docs/cases/private-data-leakage.md
+        summary: 固定替身验证远程敏感上下文阻断，未向真实远程模型发送数据
+    limitation: 当前证据不包含第三方远程模型真实发送实验；语义型敏感信息可能漏检。
+
+  - id: TH-008
+    title: 低信任材料伪造审批依据
+    entry: 文档、MCP 卡片或工具参数中的授权宣称
+    asset: 管理员审批判断与冻结的工具动作
+    scope: Web 审批事实卡和现有管理员 API；不推断人的实际识别能力
+    status: 部分验证
+    owasp: [ASI09]
+    atlas: [AML.T0051.001]
+    controls:
+      - path: src/agentsentry/goal_analysis.py
+        summary: 权威伪造与目标偏移线索
+      - path: src/agentsentry/main.py
+        summary: 审批事实卡与短时确认凭据
+      - path: src/agentsentry/service.py
+        summary: 审批锁后刷新、授权与吊销串行化，安全决定前复核有效期
+    evidence:
+      - kind: 固定重放
+        corpus: goal-lab-v1
+        cases: [A04, A07, A08, A10]
+        path: docs/cases/injection-and-output.md
+        summary: 固定提案与来源宣称分别记录，审批前禁止副作用为零
+      - kind: 单元测试
+        path: tests/test_approval_review.py
+        summary: 参数替换、状态变化、重放、过期与 CSRF 被检查
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [AUTH-APPROVAL-DOUBLE, AUTH-APPROVAL-REVOKE, AUTH-APPROVAL-PAUSE, AUTH-APPROVAL-SOURCE, AUTH-APPROVAL-TAMPER]
+        path: docs/cases/boundary-validation.md
+        summary: 双审批旧缓存问题已修复，真实 PG/Redis 两轮并发审批及审批期间变化验证未造成重复或越界副作用
+      - kind: 现场演练
+        path: docs/cases/boundary-validation.md
+        summary: revocation-race-v1 和 approval-expiry-v1 补测在修复前各出现一笔不应执行的合成写入；权限行锁及提交前到期复核后，各两轮通过；不证明人不会被欺骗
+      - kind: 单元测试
+        path: tests/test_service.py
+        summary: 预读缓存、Redis 吊销清理失败及提交/审批检查期间到期的回归
+    limitation: 原管理员 API 仍可由已认证管理员调用；自动化测试不能证明人不会被误导。
+
+  - id: TH-009
+    title: Shell 工具导致非预期代码执行
+    entry: 默认租户的 run_shell 工具提案
+    asset: 沙箱、宿主机和租户隔离边界
+    scope: 默认租户的受限 Docker 沙箱演示；其他租户禁止使用共享 Shell
+    status: 部分验证
+    owasp: [ASI02, ASI05]
+    atlas: [AML.T0053]
+    controls:
+      - path: sandbox/server.py
+        summary: 独立受限执行服务
+      - path: src/agentsentry/service.py
+        summary: 固定参数审批与工具调用核查
+    evidence:
+      - kind: 现场演练
+        path: docs/cases/execution-and-audit.md
+        summary: 审批前无执行、参数替换拒绝、只读根目录与网络系统调用限制已演练
+      - kind: 固定重放
+        corpus: attack/v2.2.0
+        cases: [B08]
+        path: docs/cases/injection-and-output.md
+        summary: 新租户的共享沙箱调用被拒绝
+    limitation: Docker 隔离练习不证明能够抵御容器运行时逃逸，不能作为生产级沙箱保证。
+
+  - id: TH-010
+    title: 远程 MCP 工具定义、实现或结果被污染
+    entry: 已登记的远程 MCP HTTPS Server 与固定 GitHub 官方 MCP 适配器
+    asset: 工具定义、结果内容、远程凭据和后续 Agent 动作
+    scope: 固定远程 HTTPS 工具与按租户 OAuth、本机 TLS 合成 Server；GitHub 固定只读与默认租户测试仓库写入使用独立 PAT，已实测一次人工审批写入；不包括任意第三方 MCP 或 GitHub 跨租户凭据隔离
+    status: 部分验证
+    owasp: [ASI04]
+    atlas: [AML.T0110.000, AML.T0110.001, AML.T0110.002]
+    controls:
+      - path: src/agentsentry/mcp_backend.py
+        summary: 保留本地 stdio 固定工具与模式核验
+      - path: src/agentsentry/mcp_remote.py
+        summary: 固定 HTTPS 出口、OAuth 声明验证、工具清单摘要、合成只读行为探针、核验后 IP 固定连接、结果结构及故障关闭
+      - path: src/agentsentry/mcp_supply.py
+        summary: 租户隔离的版本化接入档案、变化观察、人工审核和回退；新增工具仍须代码登记
+      - path: src/agentsentry/mcp_github.py
+        summary: 固定 GitHub 官方端点与工具定义摘要、默认租户资源范围、独立读写 PAT、受限结果与写入后只读核对
+      - path: src/agentsentry/service.py
+        summary: 能力授权、写入审批、调用幂等与结果不明状态
+      - path: src/agentsentry/data_flow.py
+        summary: 远程读取来源标记与远程写入前敏感数据检查
+    evidence:
+      - kind: 单元测试
+        path: tests/test_mcp.py
+        summary: SDK 2.2.0 迁移后本地 stdio 回归继续通过
+      - kind: 单元测试
+        path: tests/test_remote_mcp.py
+        summary: 受控 HTTPS/OAuth Server 验证清单固定、描述变化审核、同清单行为探针、租户配置隔离、审批前无写入、重复操作幂等与审计关联
+      - kind: 单元测试
+        path: tests/test_mcp_supply.py
+        summary: 档案批准与回退、额外工具和参数变化不可在线放行、端点身份变化与核验后 IP 固定连接
+      - kind: 验收报告
+        path: docs/mcp-supply.md
+        summary: 记录 V3.4 受控合成服务的清单、行为和网络目标实验，明确未验证的第三方实现完整性
+      - kind: 验收报告
+        path: docs/remote-mcp.md
+        summary: 记录受控本机 TLS/OAuth 部署与当时结果；跨主机通用 OAuth 互通仍未由该报告验证，后续 GitHub 链路使用独立 PAT
+      - kind: 现场演练
+        path: docs/cases/github-readonly.md
+        summary: GitHub 官方 HTTPS MCP 固定许可证读取成功，核验定义摘要并关联网关、来源、审计与 Judge；不代表任意工具或服务已验证
+      - kind: 真实模型
+        path: docs/cases/github-issue-analysis.md
+        summary: 本地 qwen3:0.6b 三次读取固定公开 Issue 后未提出危险工具，正常概述均被输出检查阻断；工具阻断率未验证，存在误拦候选
+      - kind: 现场演练
+        path: docs/cases/github-controlled-write.md
+        summary: 私有测试仓库一次人工审批写入前同标题 Issue 为零，批准后恰好为一；结果解析曾为 unknown，核对上游后补记 completed 且保留原事件，没有重写；新解析器未做第二笔在线写入
+      - kind: 单元测试
+        path: tests/test_github_mcp.py
+        summary: 固定只读资源、身份、非法参数和调用重放边界有回归，不能证明第三方实际实现长期不变
+      - kind: 单元测试
+        path: tests/test_github_mcp_write.py
+        summary: 协议桩核验固定创建参数、定义漂移、审批前零写入、拒绝与幂等，以及发送后超时保持 unknown
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [MCP-SCHEMA-DRIFT, MCP-WRONG-ID, MCP-OVERSIZED-UTF8, MCP-CONTENT-POISON, MCP-COMMIT-THEN-ERROR, MCP-COMMIT-THEN-TIMEOUT]
+        path: docs/cases/boundary-validation.md
+        summary: 正式 SDK 和固定 stdio 替身验证定义、资源、结果、字节上限及提交后故障；计数证明无重复写入，不替代第三方远程现场测试
+    limitation: V3.4 将已核验 IP 固定到本次 TCP 连接，受控测试验证了连接目标选择；仍需真实公网重绑定和不同网络栈现场验证。合成探针只检查一个固定只读结果，无法证明远端程序完整性或所有响应语义；GitHub 仍限默认租户、固定工具和一次已记录的受控写入，新解析器尚未第二次在线写入。
+
+  - id: TH-011
+    title: 无攻击输入时 Agent 持续偏离任务
+    entry: 示例 Agent 自主选择任务和工具的多步骤过程
+    asset: 用户目标、工具副作用与会话可信度
+    scope: 已新增无恶意来源的固定错误提案及预算压力实测；仍未观察自然产生的长期自主偏移
+    status: 未验证
+    owasp: [ASI10]
+    atlas: []
+    atlas_note: 本场景定义为没有攻击者输入的自主偏移；ATLAS 技术矩阵描述对手行为，不将一般性模型失准强行视为攻击技术。
+    controls:
+      - path: src/agentsentry/goal_analysis.py
+        summary: 当前单次工具与回答的辅助分析
+    evidence:
+      - kind: 验收报告
+        path: docs/cases/injection-and-output.md
+        summary: 现有目标偏移实验主要覆盖人工植入来源的诱导，未测持续自主越界
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [CHAIN-SEMANTIC-DRIFT, CHAIN-NORMAL]
+        path: docs/cases/boundary-validation.md
+        summary: 明确否定语句漏报修复后产生辅助线索；已有写权限的错误动作仍可执行，不证明自然产生的持续偏移已防住
+    limitation: 需要独立设计无攻击者输入的多步骤样本与副作用判分。
+
+  - id: TH-012
+    title: 已知合成文档的指令注入载荷进入 Agent 来源
+    entry: 完成的 read_document 调用返回固定的 injected-guide 合成样本
+    asset: Agent 后续工具选择、回答及用户任务
+    scope: 仅核实项目内固定合成样本的实际工具结果；不据此推断模型执行了注入指令
+    status: 部分验证
+    owasp: [ASI01]
+    atlas: [AML.T0051.001, AML.T0099]
+    controls:
+      - path: src/agentsentry/tools.py
+        summary: 固定合成文档与只读工具结果
+      - path: src/agentsentry/service.py
+        summary: 工具调用仍受权限与策略控制
+      - path: src/agentsentry/output_safety.py
+        summary: 后续回答另经展示前检查
+    evidence:
+      - kind: 单元测试
+        path: tests/test_threat_mapping_runtime.py
+        summary: 核对已提交工具结果、同一调用和固定样本内容；仅把确实返回的样本映射为来源暴露线索
+      - kind: 单元测试
+        path: tests/test_judge.py
+        summary: Judge 告警能追溯到工具结果事件，但模型标签不能证明工具副作用或回答污染
+    limitation: 仅识别这一份固定合成样本；其他文档的攻击内容、模型是否服从及最终回答是否污染须由独立检测和证据判定。
+
+  - id: TH-013
+    title: 已登记 Agent 会话反复调用、资源探测与累积写入
+    entry: 显式接入示例 Agent 的连续工具提案和模型发送
+    asset: 工具副作用、资源访问范围、模型出口及服务可用性
+    scope: 有效会话凭据绑定的单 Agent；固定合成工具和已登记模型出口
+    status: 部分验证
+    owasp: [ASI02, ASI10]
+    atlas: []
+    atlas_note: 固定压力提案和用户压力提示不证明存在对手；不把通用循环或模型失准强行映射为 ATLAS 攻击技术。
+    controls:
+      - path: src/agentsentry/action_chain.py
+        summary: 单会话和跨会话确定性预算、资源探测自动暂停与审计
+      - path: src/agentsentry/service.py
+        summary: 工具提交和审批执行前再次检查
+      - path: src/agentsentry/data_flow.py
+        summary: 模型发送前检查请求额度
+    evidence:
+      - kind: 固定重放
+        corpus: action-chain-cases-v1
+        cases: [A01, A05, A09, A13, A17, N01, N04, N10]
+        path: docs/action-chain.md
+        summary: 两轮 30 条固定样本结论一致；禁止副作用和审计缺失均为零
+      - kind: 真实模型
+        corpus: action-chain-live-v1
+        cases: [D-A1, D-A2, D-A3, M-A1, M-A2, M-A3, D-N1, M-N1]
+        path: docs/action-chain.md
+        summary: 本地 qwen3:0.6b 的 12 条文档和 MCP 会话；一条实际触发写入预算，其他预算类别未充分触发
+      - kind: 单元测试
+        path: tests/test_action_chain.py
+        summary: 验证幂等、写入保留额度、跨会话计数、暂停恢复、模型发送与租户隔离
+      - kind: 现场演练
+        corpus: deep-validation-v1
+        cases: [CHAIN-SESSION-CONCURRENT, CHAIN-AGENT-MULTISESSION, CHAIN-RESOURCE-PROBE, CHAIN-NORMAL]
+        path: docs/cases/boundary-validation.md
+        summary: 真实 PG/Redis/HTTP 两轮验证八路并发三笔上限、四会话十笔累计及探测暂停；另列本地模型 12 条压力和正常任务，不扩大到其他 Agent
+    limitation: 兼容模式下未绑定会话的旧工具客户端不受该预算保护；额度内的错误动作仍需策略、权限和审批处理；跨 Agent 连锁故障与无攻击输入的自主偏移未由本场景证明。
+
+  - id: TH-015
+    title: Agent 间身份冒充、委托越权和协作结果污染
+    entry: 本机父 Agent 到固定只读协作 Agent 的委托消息及返回摘要
+    asset: 父权限额度、公开读取范围、父上下文及回答展示
+    scope: 同租户、独立身份、单跳只读、两个固定工具及合成公开资料
+    status: 部分验证
+    owasp: [ASI03, ASI06, ASI07]
+    atlas: []
+    atlas_note: 身份及消息篡改用受控协议实验验证；固定协作摘要不证明攻击者使用某项已核实 ATLAS 技术，因此不强行对应。
+    controls:
+      - path: src/agentsentry/delegation.py
+        summary: 父授权缩减、额度继承、封签、时效、撤销与结果完整性
+      - path: src/agentsentry/delegation_routes.py
+        summary: 独立身份协议、管理员操作与租户隔离
+      - path: src/agentsentry/data_flow.py
+        summary: 父会话继承实际来源和回复来源，出口检查仍有效
+    evidence:
+      - kind: 固定重放
+        corpus: delegation-lab-v1
+        cases: [D01, D05, D06, D07, D12, D15, D18, D19, N01, N04]
+        path: docs/cases/delegation-boundaries.md
+        summary: 固定单跳协议攻击与正常对照；逐例结果见验收，不能替代多模型语义验证
+      - kind: 单元测试
+        path: tests/test_delegation.py
+        summary: 额度继承、全来源出口检查、敏感结果遮断和提交失败的保守预留
+      - kind: 单元测试
+        path: tests/test_delegation_api.py
+        summary: 独立身份冒充、普通接口绕过、CSRF、跨租户、正式客户端及证据链接
+    limitation: 只读单跳模型外的固定协作摘要；跨主机、多跳、写入审批继承、语义改写和双重密钥失陷未验证。

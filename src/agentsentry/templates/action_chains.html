@@ -1,0 +1,19 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("会话调查 · 行动链") }}{% endblock %}
+{% block title_text %}{{ _("会话行动链") }}{% endblock %}
+{% block content %}
+<h1>{{ _("会话调查 · 行动链") }}</h1>
+<p class="page-meta">{{ _("展示本租户最近 50 个新登记的会话。网关对带有效会话凭据的请求执行行动预算；语言目标线索不用于强制授权。") }}</p>
+{% if research_tenants %}<form method="get"><label>{{ _("数据租户") }} <select name="tenant"><option value="{{ shell_tenant_id }}" {% if tenant_id == shell_tenant_id %}selected{% endif %}>{{ _("当前登录租户") }}</option>{% for choice in research_tenants %}<option value="{{ choice.id }}" {% if tenant_id == choice.id %}selected{% endif %}>{{ choice.name }} / {{ choice.id }}</option>{% endfor %}</select></label><button>{{ _("查看") }}</button></form>{% endif %}
+<section><h2>{{ _("保护边界") }}</h2><p>{{ _("当前工具绑定：") }}{{ ('所有工具请求必须绑定会话' if runtime_binding_required else '兼容模式；旧客户端可不带会话凭据，其请求不受行动链预算保护') | ui }}{{ _("。旧会话不回填历史步骤。管理员暂停可阻止后续已登记会话的模型请求和工具调用；已经开始的副作用不能收回。") }}</p></section>
+<section><h2>{{ _("当前处置规则") }}</h2><div class="table-wrap"><table><tr><th>{{ _("类别") }}</th><th>{{ _("触发条件") }}</th><th>{{ _("处置") }}</th></tr>
+<tr><td>{{ _("调用额度") }}</td><td>{{ _("单会话第 21 次工具提案；第 9 次任务模型请求；第 4 次记忆摘要请求") }}</td><td>{{ _("拒绝本次请求") }}</td></tr>
+<tr><td>{{ _("累计写入") }}</td><td>{{ _("单会话第 4 次，或同 Agent 一小时内第 11 次写入提案。待审批、执行中和结果不明均占额度") }}</td><td>{{ _("拒绝新的写入") }}</td></tr>
+<tr><td>{{ _("资源探测") }}</td><td>{{ _("十分钟内同一会话第 4 个不同资源的调用被拒") }}</td><td>{{ _("暂停会话，由管理员复核后恢复") }}</td></tr>
+<tr><td>{{ _("语言目标线索") }}</td><td>{{ _("阅读任务转写入、来源自称获批等") }}</td><td>{{ _("沿用目标偏移辅助分析；不改变授权") }}</td></tr>
+</table></div><p class="small">{{ _("额度由网关检查；旧调用不会回填为已检查。调用重放只返回原结果，不再次计入。") }}</p></section>
+<section><h2>{{ _("最近会话") }}</h2><div class="table-wrap"><table><tr><th>{{ _("开始") }}</th><th>{{ _("会话") }}</th><th>{{ _("网关决定") }}</th><th>{{ _("最近状态") }}</th><th>{{ _("证据") }}</th></tr>
+{% for item in items %}{% set decisions = item.chain.decisions %}<tr><td>{{ item.created_at }}</td><td><code>{{ item.session_id }}</code><br>{{ item.agent_id }}</td><td>{{ decisions | length }} {{ _("条") }}{% if decisions | selectattr('effect','equalto','deny') | list %} {{ _("· 有拒绝") }}{% endif %}</td><td>{% if decisions %}{{ decisions[-1].phase }} / {{ decisions[-1].effect }}{% if decisions[-1].findings %}<br>{{ decisions[-1].findings | join('、') }}{% endif %}{% else %}{{ _("尚无受保护请求") }}{% endif %}</td><td><a href="/dashboard/action-chains/detail?agent_id={{ item.agent_id | urlencode }}&amp;session_id={{ item.session_id | urlencode }}&amp;tenant={{ tenant_id | urlencode }}">{{ _("查看行动链和审计") }}</a></td></tr>
+{% else %}<tr><td colspan="5">{{ _("暂无新登记的会话。") }}</td></tr>{% endfor %}
+</table></div></section>
+{% endblock %}

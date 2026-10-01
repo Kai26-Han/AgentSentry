@@ -1,0 +1,26 @@
+{% extends "base_dashboard.html" %}
+{% from "_judge_score.html" import score as judge_score with context %}
+{% block title %}{{ _("Judge 风险识别评测") }}{% endblock %}
+{% block title_text %}{{ _("Judge 评测") }}{% endblock %}
+{% block content %}
+<h1>{{ _("Judge 风险识别评测") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<p class="notice">{{ _("把有预期标签的合成审计事件交给所选 Judge，比较判断结果并统计误报和漏报；这项评测不会启动 Agent，也不会执行工具。本页选择只影响样本评测，日常审计仍使用") }} {{ runtime_provider }}。</p>
+<section><h2>{{ _("选择本次评测的 Judge") }}</h2>
+<form method="get" action="/dashboard/judge-samples"><label>{{ _("提供方") }} <select name="provider">{% for choice in provider_choices %}<option value="{{ choice.id }}" {% if choice.id == selected_provider %}selected{% endif %}>{{ (choice.label) | ui }}</option>{% endfor %}</select></label><button>{{ _("查看该提供方结果") }}</button></form>
+{% if selected_choice %}<p>{{ _("当前选择：") }}<b>{{ (selected_choice.label) | ui }}</b> {{ _("· 模型：") }}<code>{{ selected_choice.model }}</code> {{ _("· 数据目的地：") }}<code>{{ selected_choice.destination | ui }}</code></p>
+{% else %}<p>{{ _("该提供方当前未配置，仅可查看历史结果；请先在本机配置后再运行评测。") }}</p>{% endif %}
+<p class="small">{{ _("点击下方“评测”会为该样本创建一次新的异步评测。选择云端提供方时，脱敏后的合成事件会发送到上方目的地；密钥不会显示在页面上。") }}</p></section>
+<section><h2>{{ _("样本结果与误报统计") }}</h2>
+<p class="small">{{ _("样本分数是风险信号（0–1），不是攻击成功概率。标签不为 none 且分数达到当前阈值") }} {{ judge_threshold() }} {{ _("时，评测把它计为“识别到风险”；样本评测不会生成日常告警。不同提供方的分数不宜直接比较。") }}</p>
+<p>{{ selected_provider }} {{ _("已评测") }} {{ sample_stats.evaluated }}/{{ sample_stats.total }} {{ _("条；误报率：") }}{{ (('%.1f%%' | format(sample_stats.false_positive_rate * 100)) if sample_stats.false_positive_rate is not none else '暂无负例') | ui }}{{ _("；漏报率：") }}{{ (('%.1f%%' | format(sample_stats.false_negative_rate * 100)) if sample_stats.false_negative_rate is not none else '暂无正例') | ui }}</p>
+<p class="small">TP {{ sample_stats.tp }} · FP {{ sample_stats.fp }} · TN {{ sample_stats.tn }} · FN {{ sample_stats.fn }}{{ _("。每条样本取该提供方最近一次完成的结果；新评测排队期间仍显示上一次已完成结果。") }}</p>
+{% if sample_status %}<p>{{ ({'added':'样本已添加','invalid':'样本格式错误或名称重复','queued':'样本已排队','deleted':'样本已删除'}.get(sample_status, '')) | ui }}</p>{% endif %}
+<table><tr><th>{{ _("样本") }}</th><th>{{ _("预期标签") }}</th><th>{{ _("该提供方最近完成结果") }}</th><th>{{ _("操作") }}</th></tr>
+{% for sample in samples %}{% set result = latest_samples.get(sample.id) %}<tr><td>{{ sample.name }}<br><span class="small">{{ sample.event_type }}</span></td><td>{{ sample.expected_labels | join(', ') }}</td><td>{{ (result.labels | join(', ') if result else '未评测') | ui }}{% if result %}<br>{{ judge_score(result.score, result.labels, true) }}{% endif %}</td><td><form method="post" action="/dashboard/samples/{{ sample.id }}/run"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="provider" value="{{ selected_provider }}"><button {% if not selected_choice %}disabled{% endif %}>{{ _("评测") }}</button></form><form method="post" action="/dashboard/samples/{{ sample.id }}/delete"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="provider" value="{{ selected_provider }}"><button>{{ _("删除") }}</button></form></td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无样本") }}</td></tr>{% endfor %}</table>
+<h3>{{ _("添加合成样本") }}</h3><form method="post" action="/dashboard/samples"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="provider" value="{{ selected_provider }}">
+<label>{{ _("名称") }} <input name="name" maxlength="120" required></label>
+<label>{{ _("事件类型") }} <select name="event_type"><option>tool_result</option><option>policy_decision</option><option>capability_denied</option></select></label>
+<label>{{ _("预期标签") }} <input name="expected_labels" value="none" required></label><br>
+<label>{{ _("事件负载 JSON") }}<br><textarea name="payload" rows="4" cols="70" required>{"tool":"read_document","arguments":{"document_id":"synthetic-public"},"result":{"content":"Review the plan.","sensitivity":"public"},"status":"completed"}</textarea></label><br><button>{{ _("添加样本") }}</button></form></section>
+{% endblock %}

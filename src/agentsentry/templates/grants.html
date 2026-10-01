@@ -1,0 +1,16 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("工具调用授权") }}{% endblock %}
+{% block title_text %}{{ _("工具调用授权") }}{% endblock %}
+{% block content %}
+<h1>{{ _("工具调用授权") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 为示例 Agent 限定可调用的工具、资源、有效期和次数。") }}</p>
+<section><h2>{{ _("签发授权") }}</h2>
+<form method="post" action="/dashboard/grants"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label>{{ _("工具") }} <select name="tool"><option>read_document</option><option>create_task</option><option>delete_task</option><option>send_external</option><option>run_shell</option><option>mcp_lookup_card</option><option>mcp_record_note</option><option>remote_mcp_lookup_card</option><option>remote_mcp_record_note</option><option>github_mcp_read_license</option><option>github_mcp_read_issue</option><option>github_mcp_create_test_issue</option></select></label>
+<label>{{ _("资源 ID（逗号分隔）") }}<input name="resources" required placeholder="public-guide"></label>
+<label>{{ _("有效秒数") }} <input type="number" name="ttl_seconds" min="30" max="3600" value="600"></label>
+<label>{{ _("最多次数") }} <input type="number" name="max_uses" min="1" max="100" value="1"></label><button>{{ _("签发授权") }}</button></form>
+<p class="small">{{ _("示例资源：文档 public-guide / private-notes / injected-guide；任务列表 main；外发目的地 demo-inbox；沙箱 sandbox-shell；远程卡片 remote-public-guide；远程写入 remote-demo-notes；GitHub Issue modelcontextprotocol/modelcontextprotocol#3213。远程 MCP 还须先在可信配置中登记。") }}</p></section>
+<section><h2>{{ _("授权记录") }}</h2><table><tr><th>{{ _("工具") }}</th><th>{{ _("资源") }}</th><th>{{ _("有效期") }}</th><th>{{ _("状态") }}</th><th></th></tr>
+{% for grant in grants %}<tr><td>{{ grant.tool }}</td><td>{{ grant.resources | join(', ') }}</td><td>{{ grant.expires_at }}</td><td>{{ ('已吊销' if grant.revoked else '有效或已过期') | ui }}</td><td>{% if not grant.revoked %}<form method="post" action="/dashboard/grants/{{ grant.id }}/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("吊销") }}</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="5">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

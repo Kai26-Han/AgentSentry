@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1110" viewBox="0 0 1600 1110" role="img" aria-labelledby="title desc">
+<title id="title">AgentSentry Architecture: Checks, Execution and Evidence</title>
+<desc id="desc">Tasks and synthetic lab inputs reach the demo Agent. The trusted adapter requests gateway checks. The gateway decides tool, model, output and memory safety; adapters send model requests and display approved text. Tool endpoints execute approved actions. PostgreSQL audit and Outbox support asynchronous Judge and alerts. Web links evidence and administration. An independent read-only collaborator uses attenuated authority through the same gateway.</desc>
+<defs>
+ <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#45657d" /></marker>
+ <marker id="back" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#168579" /></marker>
+</defs>
+<style>
+ text {font-family: 'Arial','Helvetica',sans-serif;fill:#153448}
+ .head {font-size:23px;font-weight:700}
+ .body {font-size:18px;fill:#466174}
+ .label {font-size:18px;fill:#45657d}
+ .small {font-size:18px;fill:#617b8b}
+</style>
+<rect width="1600" height="1110" fill="#f3f7fb" />
+<rect x="0" y="0" width="1600" height="86" fill="#153448" />
+<text x="60" y="55" style="font-size:34px;font-weight:700;fill:#fff">AgentSentry</text>
+<text x="330" y="55" style="font-size:24px;fill:#d3e4ee">From safety checks to execution and evidence</text>
+
+<rect x="60" y="130" width="270" height="115" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<text x="82" y="172" class="head">User task</text>
+<text x="82" y="212" class="body">Daily / synthetic input</text>
+<rect x="395" y="130" width="330" height="115" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<text x="417" y="172" class="head">Model service</text>
+<text x="417" y="212" class="body">Local / registered remote</text>
+<rect x="60" y="350" width="270" height="180" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<rect x="60" y="368" width="5" height="144" rx="2" fill="#5d879f" />
+<text x="82" y="392" class="head">Demo Agent</text>
+<text x="82" y="432" class="body">Interpret tasks, propose calls</text>
+<text x="82" y="467" class="body">Draft answers and memory</text>
+<rect x="395" y="350" width="330" height="180" rx="16" fill="#edf6fc" stroke="#8fb8d2" stroke-width="2" />
+<rect x="395" y="368" width="5" height="144" rx="2" fill="#3482ad" />
+<text x="417" y="392" class="head">Trusted adapter</text>
+<text x="417" y="432" class="body">Hold keys and session binding</text>
+<text x="417" y="467" class="body">Check, then send allowed data</text>
+<text x="417" y="502" class="body">Display gateway-approved text</text>
+<rect x="790" y="290" width="390" height="300" rx="16" fill="#eaf7f2" stroke="#65aa96" stroke-width="2" />
+<rect x="790" y="308" width="5" height="264" rx="2" fill="#168579" />
+<text x="812" y="332" class="head">FastAPI gateway</text>
+<text x="812" y="372" class="body">Identity / grants / tool policy</text>
+<text x="812" y="407" class="body">Approval / runtime / budgets</text>
+<text x="812" y="442" class="body">Model exit / output / memory</text>
+<text x="812" y="477" class="body">Commit decision and audit first</text>
+<rect x="812" y="541" width="344" height="31" rx="8" fill="#d7eee4" />
+<text x="825" y="564" class="small" style="fill:#186756;font-size:20px;">Redis: atomic grants and uses</text>
+<rect x="1245" y="290" width="295" height="300" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<rect x="1245" y="308" width="5" height="264" rx="2" fill="#64829a" />
+<text x="1267" y="332" class="head" style="font-size:21px">Approved tool execution</text>
+<text x="1267" y="372" class="body">Fixed simulated tools</text>
+<text x="1267" y="407" class="body">Local MCP (stdio)</text>
+<text x="1267" y="442" class="body">Registered MCP / GitHub</text>
+<text x="1267" y="477" class="body">Restricted Docker sandbox</text>
+<polyline points="195,245 195,350" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="210" y="307" class="label">Task</text>
+<polyline points="330,422 395,422" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="362" y="400" class="label" text-anchor="middle" style="font-size:14px">Proposal</text>
+<polyline points="395,477 330,477" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round" />
+<text x="362" y="506" class="label" style="font-size:14px" text-anchor="middle">Result</text>
+<polyline points="525,350 525,245" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="420" y="285" class="label">Allowed data</text>
+<polyline points="615,245 615,350" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round" />
+<text x="628" y="310" class="label" style="fill:#168579;">Model result</text>
+<polyline points="725,416 790,416" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="757" y="392" class="label" text-anchor="middle" style="font-size:14px">Check</text>
+<polyline points="790,492 725,492" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round" />
+<text x="757" y="522" class="label" style="font-size:14px" text-anchor="middle">Decision</text>
+<polyline points="1180,393 1245,393" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="1212" y="369" class="label" text-anchor="middle" style="font-size:14px">Execute</text>
+<polyline points="1245,496 1180,496" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round" />
+<text x="1212" y="526" class="label" style="font-size:14px" text-anchor="middle">Sources</text>
+<rect x="60" y="670" width="270" height="135" rx="16" fill="#f0eef9" stroke="#c7bedc" stroke-width="2" />
+<text x="82" y="712" class="head">Attack lab runners</text>
+<text x="82" y="752" class="body">Scripted / real model</text>
+<text x="82" y="787" class="body">Versioned attacks and controls</text>
+<polyline points="195,670 195,530" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="211" y="613" class="label">New test tasks</text>
+<rect x="395" y="670" width="330" height="135" rx="16" fill="#f0eef9" stroke="#c7bedc" stroke-width="2" />
+<text x="417" y="712" class="head">Read-only collaborator</text>
+<text x="417" y="752" class="body">Independent identity, one hop</text>
+<text x="417" y="787" class="body">Smaller scope, low-trust reply</text>
+<polyline points="725,723 755,723 755,570 790,570" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="540" y="639" class="label">Scoped delegation → gateway</text>
+<rect x="790" y="670" width="390" height="135" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<text x="812" y="712" class="head">PostgreSQL</text>
+<text x="812" y="752" class="body">Operations / long-term memory</text>
+<text x="812" y="787" class="body">Audit / transactional Outbox</text>
+<polyline points="990,590 990,670" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="1006" y="636" class="label">Commit evidence</text>
+<rect x="1245" y="670" width="295" height="135" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<text x="1267" y="712" class="head">Async analysis</text>
+<text x="1267" y="752" class="body">Dispatcher / Celery</text>
+<text x="1267" y="787" class="body">Judge, alerts, threat mapping</text>
+<polyline points="1180,709 1245,709" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="1212" y="685" class="label" text-anchor="middle" style="font-size:14px">Deliver</text>
+<polyline points="1245,770 1180,770" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round" />
+<text x="1212" y="799" class="label" style="font-size:14px" text-anchor="middle">Results</text>
+<rect x="790" y="895" width="750" height="125" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2" />
+<text x="812" y="937" class="head">Web console (inside gateway)</text>
+<text x="812" y="977" class="body">Session investigation, fact-card approvals, memory, data flow and experiments</text>
+<polyline points="990,805 990,895" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="1006" y="855" class="label">Linked records</text>
+<polyline points="1390,805 1390,895" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round" />
+<text x="1406" y="855" class="label">Analysis status</text>
+<rect x="60" y="875" width="665" height="145" rx="16" fill="#e9f0f5" />
+<text x="83" y="909" class="head">How to read this diagram</text>
+<text x="83" y="945" class="body" style="font-size:18px">The model proposes; the gateway decides.</text>
+<text x="83" y="978" class="body" style="font-size:18px">Adapters call models; tool endpoints execute approved actions.</text>
+<text x="83" y="1011" class="body" style="font-size:18px">Judge supplies retrospective signals, not synchronous authority.</text>
+<line x1="60" y1="1057" x2="1540" y2="1057" stroke="#cfdee7" />
+<text x="60" y="1090" class="small">Solid: request / execution / evidence    Dashed: decisions / results</text>
+<text x="790" y="1090" class="small">Scope: explicitly integrated paths; see the architecture guide</text>
+</svg>

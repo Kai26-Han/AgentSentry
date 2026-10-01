@@ -1,0 +1,67 @@
+version: 1
+cases:
+  - name: public_read
+    tool: read_document
+    arguments: {document_id: public-guide}
+    effect: allow
+    rule: public_or_scoped_read
+  - name: private_read_still_needs_capability
+    tool: read_document
+    arguments: {document_id: private-notes}
+    effect: allow
+    rule: public_or_scoped_read
+  - name: create_task
+    tool: create_task
+    arguments: {title: Review plan, list_id: main}
+    effect: allow
+    rule: create_task
+  - name: delete_needs_approval
+    tool: delete_task
+    arguments: {task_id: 11111111-1111-4111-8111-111111111111}
+    effect: require_approval
+    rule: delete_needs_review
+  - name: simulated_send_needs_approval
+    tool: send_external
+    arguments: {destination_id: demo-inbox, content: Meeting summary}
+    effect: require_approval
+    rule: external_needs_review
+  - name: secret_marker_denied_first
+    tool: send_external
+    arguments: {destination_id: demo-inbox, content: "secret: synthetic"}
+    effect: deny
+    rule: prohibit_secret_marker
+  - name: password_marker_denied
+    tool: send_external
+    arguments: {destination_id: demo-inbox, content: "password=synthetic"}
+    effect: deny
+    rule: prohibit_secret_marker
+  - name: shell_unavailable_to_new_tenant
+    tool: run_shell
+    arguments: {command: "printf hello", timeout_seconds: 3}
+    effect: deny
+    rule: tenant_sandbox_unavailable
+  - name: mcp_card_read
+    tool: mcp_lookup_card
+    arguments: {card_id: public-guide}
+    effect: allow
+    rule: mcp_card_read
+  - name: mcp_note_needs_approval
+    tool: mcp_record_note
+    arguments: {note_id: review-1, text: Synthetic review note}
+    effect: require_approval
+    rule: mcp_note_needs_review
+  - name: remote_mcp_card_read
+    tool: remote_mcp_lookup_card
+    arguments: {card_id: remote-public-guide}
+    effect: allow
+    rule: remote_mcp_card_read
+  - name: remote_mcp_note_needs_approval
+    tool: remote_mcp_record_note
+    arguments: {note_id: review-1, text: Synthetic remote review note}
+    effect: require_approval
+    rule: remote_mcp_note_needs_review
+  - name: github_issue_requires_explicit_policy
+    tool: github_mcp_read_issue
+    arguments: {}
+    effect: deny
+    rule: default_deny

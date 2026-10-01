@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% from "_judge_score.html" import score as judge_score with context %}
+{% block title %}{{ _("工具调用与审计") }}{% endblock %}
+{% block title_text %}{{ _("审计与 Judge") }}{% endblock %}
+{% block content %}
+<h1>{{ _("工具调用与审计 ·") }} {{ ('Judge 结果' if shell_view == 'judge' else '审计事件') | ui }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 审计记录和异步风险判断。") }}</p>
+<section class="view-panel" {% if shell_view == 'judge' %}hidden{% endif %}><h2>{{ _("最近审计事件") }}</h2><p class="small">{{ _("“指定 Judge”是事件创建时记录的选择；“处理状态”显示是否入队及实际评判结果。旧事件可能没有指定记录，但仍已有 Judge 结果。") }}</p><table><tr><th>{{ _("时间") }}</th><th>{{ _("调用") }}</th><th>{{ _("类型") }}</th><th>{{ _("指定 Judge") }}</th><th>{{ _("处理状态") }}</th></tr>
+{% for event in events %}{% set evidence = event_evidence[event.id] %}<tr><td>{{ event.created_at }}</td><td>{% if event.call_id %}<a href="/dashboard/calls/{{ event.call_id }}"><code>{{ event.call_id }}</code></a>{% else %}{{ _("无关联调用") }}{% endif %}</td><td>{{ event.event_type }}</td><td>{{ evidence.designated }}</td><td>{{ (evidence.status) | ui }}</td></tr>
+{% else %}<tr><td colspan="5">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+<section class="view-panel" {% if shell_view != 'judge' %}hidden{% endif %}><h2>{{ _("Judge 结果") }}</h2><p class="small">{{ _("分数是单条审计事件的风险信号（0–1），不是攻击成功概率。风险标签不为 none 且分数达到当前阈值") }} {{ judge_threshold() }}{{ _("，才满足日常 Judge 告警的判定条件；同类告警可能归并。未达条件不等于安全，是否发生副作用请查看关联调用。不同 Judge 的分数不宜直接比较。") }}</p><table><tr><th>{{ _("时间") }}</th><th>{{ _("调用") }}</th><th>{{ _("标签") }}</th><th>{{ _("风险分数与判读") }}</th><th>{{ _("指定 Judge") }}</th><th>{{ _("实际 Judge") }}</th></tr>
+{% for result in judges %}{% set route = judge_routes.get(result.outbox_id) %}<tr><td>{{ result.created_at }}</td><td>{% if result.call_id %}<a href="/dashboard/calls/{{ result.call_id }}"><code>{{ result.call_id }}</code></a>{% else %}{{ _("无关联调用") }}{% endif %}</td><td>{{ result.labels | join(', ') }}</td><td>{{ judge_score(result.score, result.labels) }}</td><td>{{ (route.provider ~ ' / ' ~ route.model_name if route else '旧事件未记录指定 Judge') | ui }}</td><td>{{ result.provider }} / {{ result.model_version }}</td></tr>
+{% else %}<tr><td colspan="6">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

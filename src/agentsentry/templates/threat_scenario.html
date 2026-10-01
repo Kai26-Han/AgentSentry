@@ -1,0 +1,48 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ threat.id }} · {{ (threat.title) | ui }}{% endblock %}
+{% block title_text %}{{ _("项目威胁详情") }}{% endblock %}
+{% block breadcrumb %}<a href="/dashboard/threat-map">{{ _("威胁与框架映射") }}</a> / {{ threat.id }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/threat-map">{{ _("← 返回威胁与框架映射") }}</a></p>
+<h1><code>{{ threat.id }}</code> {{ (threat.title) | ui }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 映射版本：") }}<code>{{ catalog.mapping_version }}</code> {{ _("· 项目验证状态：") }}<strong>{{ (threat.status) | ui }}</strong></p>
+<div class="notice">{{ _("下方“项目验证状态”来自样本与测试结论；“实际事件”只显示当前租户的规则命中。框架关联与规则命中都不单独证明攻击成功。") }}</div>
+
+<section><h2>{{ _("场景与边界") }}</h2>
+<dl class="threat-facts"><dt>{{ _("攻击入口") }}</dt><dd>{{ (threat.entry) | ui }}</dd>
+<dt>{{ _("受影响资产") }}</dt><dd>{{ (threat.asset) | ui }}</dd>
+<dt>{{ _("适用范围") }}</dt><dd>{{ (threat.scope) | ui }}</dd>
+<dt>{{ _("当前结论") }}</dt><dd>{{ (threat.status) | ui }}</dd>
+<dt>{{ _("剩余缺口") }}</dt><dd>{{ (threat.limitation) | ui }}</dd></dl></section>
+
+<section><h2>{{ _("风险框架对应") }}</h2>
+<div class="table-wrap"><table><tr><th>{{ _("框架") }}</th><th>{{ _("类别或技术") }}</th><th>{{ _("对应含义") }}</th></tr>
+{% for category in categories %}<tr><td>OWASP Agentic Top 10 2026</td><td><a href="{{ catalog.frameworks.owasp.url }}">{{ category.id }} {{ category.name }}</a></td><td>{{ (category.note) | ui }}</td></tr>{% endfor %}
+{% for technique in techniques %}<tr><td>MITRE ATLAS {{ catalog.frameworks.atlas.release }}</td><td><a href="{{ technique.url }}">{{ technique.id }} {{ technique.name }}</a></td><td>{{ _("攻击技术关联；需结合本场景证据判断。") }}</td></tr>{% endfor %}
+{% if not techniques %}<tr><td>MITRE ATLAS</td><td>{{ _("未强行对应") }}</td><td>{{ (threat.atlas_note) | ui }}</td></tr>{% endif %}
+</table></div></section>
+
+<section><h2>{{ _("项目控制措施") }}</h2>
+<div class="table-wrap"><table><tr><th>{{ _("措施") }}</th><th>{{ _("实现位置") }}</th></tr>
+{% for control in threat.controls %}<tr><td>{{ (control.summary) | ui }}</td><td><code>{{ control.path }}</code></td></tr>{% endfor %}
+</table></div></section>
+
+<section><h2>{{ _("测试与报告证据") }}</h2>
+<div class="table-wrap"><table><tr><th>{{ _("类型") }}</th><th>{{ _("样本或文件") }}</th><th>{{ _("已记录的结论") }}</th></tr>
+{% for evidence in threat.evidence %}<tr><td>{{ (evidence.kind) | ui }}</td><td>{% if evidence.corpus %}<code>{{ evidence.corpus }}:{{ evidence.cases | join('、') }}</code><br>{% endif %}<code>{{ evidence.path }}</code></td><td>{{ (evidence.summary) | ui }}</td></tr>{% endfor %}
+</table></div></section>
+
+<section><h2>{{ _("日常事件映射规则") }}</h2>
+<div class="table-wrap"><table><tr><th>{{ _("规则") }}</th><th>{{ _("审计事件") }}</th><th>{{ _("触发条件") }}</th></tr>
+{% for signal in signals %}<tr><td><code>{{ signal.id }}</code> {{ (signal.title) | ui }}</td><td>{{ signal.event_type }}</td><td>{% for key, value in signal.when.items() %}<code>{{ key }}={{ value }}</code>{% if not loop.last %}、{% endif %}{% endfor %}</td></tr>
+{% else %}<tr><td colspan="3">{{ _("目前没有可核实的日常事件映射规则；该场景仍可通过上方测试证据研究。") }}</td></tr>{% endfor %}
+</table></div></section>
+
+<section id="events"><h2>{{ _("当前租户的实际事件") }}</h2>
+<form method="get" action="/dashboard/threat-map/threats/{{ threat.id }}#events"><label>{{ _("最近天数") }} <input name="days" type="number" min="1" max="3650" value="{{ days }}"></label><button>{{ _("查看") }}</button></form>
+<p class="small">{{ _("本范围命中") }} {{ total_rows }} {{ _("条；下表显示最近 100 条。没有事件不代表场景安全，也不改变项目验证状态。") }}</p>
+<div class="table-wrap"><table><tr><th>{{ _("时间") }}</th><th>{{ _("命中线索") }}</th><th>{{ _("原处置") }}</th><th>{{ _("证据") }}</th></tr>
+{% for row in rows %}<tr><td>{{ row.observed_at }}</td><td>{% for match in row.matches if match.threat_id == threat.id %}{{ (match.signal_title) | ui }}{% if not loop.last %}、{% endif %}{% endfor %}</td><td>{% for match in row.matches if match.threat_id == threat.id %}{{ (match.effect or '仅线索') | ui }}{% if not loop.last %}、{% endif %}{% endfor %}</td><td><a href="/dashboard/threat-map/{{ row.id }}">{{ _("查看事件证据") }}</a></td></tr>
+{% else %}<tr><td colspan="4">{{ _("当前租户和时间范围内暂无此场景的映射事件。") }}</td></tr>{% endfor %}
+</table></div></section>
+{% endblock %}

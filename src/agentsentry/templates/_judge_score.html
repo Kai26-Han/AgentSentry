@@ -1,0 +1,7 @@
+{% macro score(value, labels, sample=false) -%}
+{% set threshold = judge_threshold() %}
+{% set risk = labels != ['none'] and value >= threshold %}
+<span class="judge-score">{{ '%.2f' | format(value) }} / 1</span>
+{% if risk %}<span class="judge-signal judge-signal-hit">{{ ('达到风险阈值' if sample else '达到告警判定线') | ui }}</span>
+{% elif labels == ['none'] %}<span class="judge-signal">{{ _("未识别风险标签") }}</span>
+{% else %}<span class="judge-signal">{{ _("低于风险阈值") }}</span>{% endif %}{%- endmacro %}

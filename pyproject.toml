@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentsentry"
+version = "0.3.0"
+description = "A local Agent security gateway and learning lab"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+  "sqlalchemy>=2.0,<3",
+  "psycopg[binary]>=3.2,<4",
+  "redis>=5,<7",
+  "celery[redis]>=5.4,<6",
+  "pydantic-settings>=2.7,<3",
+  "pyyaml>=6,<7",
+  "httpx>=0.28,<1",
+  "jinja2>=3.1,<4",
+  "itsdangerous>=2.2,<3",
+  "python-multipart>=0.0.20,<1",
+  "mcp==2.2.0",
+  "httpx2==2.13.1",
+  "httpcore2==2.13.1",
+  "PyJWT[crypto]>=2.10,<3",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "fakeredis>=2.27,<3"]
+
+[project.scripts]
+agentsentry-demo = "agentsentry.demo_agent:main"
+agentsentry-eval = "agentsentry.evaluation:main"
+agentsentry-policy-test = "agentsentry.policy_tests:main"
+agentsentry-attack-lab = "agentsentry.attack_runner:main"
+agentsentry-output-eval = "agentsentry.output_samples:main"
+agentsentry-memory-lab = "agentsentry.memory_lab_runner:main"
+agentsentry-memory-security-lab = "agentsentry.memory_security_lab:main"
+agentsentry-runtime-eval = "agentsentry.runtime_lab:main"
+agentsentry-data-flow-lab = "agentsentry.data_flow_lab:main"
+agentsentry-calibration-lab = "agentsentry.calibration_runner:main"
+agentsentry-goal-lab = "agentsentry.goal_lab_runner:main"
+agentsentry-action-chain-lab = "agentsentry.action_chain_lab:main"
+agentsentry-action-chain-live = "agentsentry.action_chain_live:main"
+agentsentry-reader = "agentsentry.reader_agent:main"
+agentsentry-delegation-lab = "agentsentry.delegation_lab:main"
+agentsentry-fault-lab = "agentsentry.fault_lab:main"
+agentsentry-learning = "agentsentry.learning_assessment:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentsentry"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

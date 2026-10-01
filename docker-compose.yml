@@ -1,0 +1,118 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agentsentry
+      POSTGRES_USER: agentsentry
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentsentry"]
+      interval: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+  web:
+    build: .
+    env_file: .env
+    environment:
+      POLICY_PATH: /app/runtime-policies/default.yaml
+      SANDBOX_URL: http://sandbox:8080
+      MCP_DEMO_DIR: /app/mcp-data
+      JUDGE_PROVIDER: ${JUDGE_PROVIDER:-mock}
+    volumes:
+      - policy_data:/app/runtime-policies
+      - mcp_demo_data:/app/mcp-data
+    networks:
+      - default
+      - sandbox_net
+    ports:
+      - "127.0.0.1:${AGENTSENTRY_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      sandbox:
+        condition: service_healthy
+  sandbox:
+    build:
+      context: .
+      dockerfile: sandbox/Dockerfile
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 32
+    mem_limit: 192m
+    cpus: 0.5
+    networks:
+      - sandbox_net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 3s
+      retries: 10
+  remote-demo:
+    profiles: ["remote-mcp-demo"]
+    build: .
+    command: ["python", "-m", "agentsentry.mcp_remote_server", "--host", "0.0.0.0", "--port", "9443"]
+    env_file:
+      - .env
+      - .local/remote-demo.env
+    environment:
+      REMOTE_MCP_DEMO_ISSUER: https://remote-demo:9443
+      REMOTE_MCP_DEMO_AUDIENCE: https://remote-demo:9443/mcp
+      REMOTE_MCP_DEMO_HOST: remote-demo
+      REMOTE_MCP_DEMO_DB_PATH: /app/remote-mcp-data/notes.db
+    volumes:
+      - remote_mcp_data:/app/remote-mcp-data
+  worker:
+    build: .
+    command: ["celery", "-A", "agentsentry.judge.worker:celery_app", "worker", "--loglevel=info", "--concurrency=1", "-Q", "judge,celery", "-n", "judge@%h"]
+    env_file: .env
+    environment:
+      JUDGE_PROVIDER: ${JUDGE_PROVIDER:-mock}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  webhook-worker:
+    build: .
+    command: ["celery", "-A", "agentsentry.judge.worker:celery_app", "worker", "--loglevel=info", "--concurrency=1", "-Q", "webhook", "-n", "webhook@%h"]
+    env_file: .env
+    environment:
+      JUDGE_PROVIDER: ${JUDGE_PROVIDER:-mock}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  dispatcher:
+    build: .
+    command: ["python", "-m", "agentsentry.dispatcher"]
+    env_file: .env
+    environment:
+      JUDGE_PROVIDER: ${JUDGE_PROVIDER:-mock}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+volumes:
+  pgdata:
+  policy_data:
+  mcp_demo_data:
+  remote_mcp_data:
+networks:
+  sandbox_net:
+    internal: true

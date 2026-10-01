@@ -1,0 +1,43 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("会话调查 · 目标偏移") }}{% endblock %}
+{% block title_text %}{{ _("目标偏移") }}{% endblock %}
+{% block content %}
+<h1>{{ _("会话调查 · 目标偏移") }}</h1>
+<p class="page-meta">{{ _("仅显示辅助分析线索。未命中不表示已完整理解用户任务；这些线索不改变网关授权。") }}</p>
+<p class="page-meta">{{ _("登录租户：") }}<code>{{ shell_tenant_id }}</code>{{ _("；数据租户：") }}<code>{{ tenant_id }}</code>{% if observer %}{{ _("（研究数据，只读）") }}{% else %}{{ _("（日常运行）") }}{% endif %}。</p>
+{% if choices %}
+<section>
+  <h2>{{ _("选择数据租户") }}</h2>
+  <form method="get" action="/dashboard/goal-assessments">
+    <label for="goal-tenant">{{ _("数据来源") }}</label>
+    <select id="goal-tenant" name="tenant">
+      <option value="{{ shell_tenant_id }}" {% if tenant_id == shell_tenant_id %}selected{% endif %}>{{ _("当前登录租户 · 日常运行") }}</option>
+      {% for choice in choices %}
+      <option value="{{ choice.id }}" {% if choice.id == tenant_id %}selected{% endif %}>{{ choice.name }} · {{ choice.id }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">{{ _("查看") }}</button>
+  </form>
+  <p class="page-meta">{{ _("研究记录按数据租户隔离；切换会话调查标签时保留当前选择。") }}<a href="/dashboard/goal-runs?tenant={{ tenant_id | urlencode }}">{{ _("查看实验运行") }}</a></p>
+</section>
+{% endif %}
+<section>
+  <table>
+    <tr><th>{{ _("时间") }}</th><th>{{ _("会话") }}</th><th>{{ _("阶段") }}</th><th>{{ _("结论") }}</th><th>{{ _("线索与证据") }}</th></tr>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.created_at }}</td>
+      <td>{% if item.session_url %}<a href="{{ item.session_url }}">{{ item.session_id }}</a>{% else %}<code>{{ item.session_id }}</code>{% endif %}</td>
+      <td>{{ (item.phase) | ui }}</td>
+      <td>{{ ({'suspected':'疑似偏移','aligned':'未命中','unknown':'无法判断','failed':'分析失败'}.get(item.status,item.status)) | ui }}</td>
+      <td>{{ (item.findings | join('、') or '无') | ui }}
+        {% if item.call_id %}<br>{% if item.call_url %}<a href="{{ item.call_url }}">{{ _("查看调用") }}</a>{% else %}<code>{{ _("调用") }} {{ item.call_id }}</code>{% endif %}{% endif %}
+        {% for source in item.sources %}<br>{{ _("来源：") }}{% if source.url %}<a href="{{ source.url }}"><code>{{ source.id }}</code></a>{% else %}<code>{{ source.id }}</code>{% endif %}{% endfor %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">{% if observer %}{{ _("所选研究租户暂无目标偏移记录。可在“目标偏移实验”查看运行状态。") }}{% else %}{{ _("当前登录租户暂无日常目标偏移记录。旧会话不回填；如需查看测试数据，请在上方选择研究租户。") }}{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

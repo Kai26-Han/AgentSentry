@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("攻防验证与规则校准") }}{% endblock %}
+{% block title_text %}{{ _("攻防验证与规则校准") }}{% endblock %}
+{% block content %}
+<h1>{{ _("攻防验证与规则校准") }}</h1>
+<p class="page-meta">{{ _("实验数据范围：") }}{% if selected_tenant %}<code>{{ selected_tenant }}</code>{% else %}{{ _("全部研究租户") }}{% endif %}{{ _("。固定提案与真实模型分开判分；页面只展示已经产生的实验记录。") }}</p>
+<p class="notice">{{ _("通过本机命令") }} <code>agentsentry-calibration-lab --mode scripted</code> {{ _("或") }} <code>--mode live</code> {{ _("启动新实验。校准建议不会自动改变安全规则。旧版攻击实验的草稿污染口径不回写。") }}</p>
+{% if research_tenants %}<section><form method="get" action="/dashboard/calibration-runs"><label>{{ _("查看研究租户") }} <select name="tenant"><option value="" {% if not selected_tenant %}selected{% endif %}>{{ _("全部研究租户") }}</option>{% for item in research_tenants %}<option value="{{ item.id }}" {% if selected_tenant == item.id %}selected{% endif %}>{{ (item.name) | ui }} / {{ item.id }}</option>{% endfor %}</select></label><button>{{ _("查看") }}</button></form></section>{% endif %}
+<section><h2>{{ _("实验运行") }}</h2><div class="table-wrap"><table><tr><th>{{ _("开始时间") }}</th><th>{{ _("数据租户") }}</th><th>{{ _("模式／模型") }}</th><th>{{ _("状态") }}</th><th>{{ _("已提交") }}</th><th>{{ _("危险调用尝试") }}</th><th>{{ _("禁止副作用") }}</th><th>{{ _("展示污染") }}</th><th>{{ _("正常完成") }}</th><th>{{ _("审计缺失") }}</th></tr>
+{% for run in runs %}<tr><td><a href="/dashboard/calibration-runs/{{ run.id }}?tenant={{ run.data_tenant }}">{{ run.started_at }}</a></td><td><code>{{ run.data_tenant }}</code></td><td>{{ run.mode }} / {{ (run.model_name or '无模型') | ui }}</td><td>{{ (run.status) | ui }}</td><td>{{ run.submitted_cases }}/{{ run.expected_cases }}</td><td>{{ run.counts.get('attempted', 0) }}</td><td>{{ run.counts.get('side_effect', 0) }}</td><td>{{ run.counts.get('displayed_contaminated', 0) }}</td><td>{{ run.counts.get('normal_completed', 0) }}/{{ run.counts.get('normal', 0) }}</td><td>{{ run.counts.get('audit_missing', 0) }}</td></tr>
+{% else %}<tr><td colspan="10">{{ _("暂无校准实验。运行命令后这里会显示新记录。") }}</td></tr>{% endfor %}</table></div></section>
+<section><h2>{{ _("日常流量规则命中汇总（最近 30 天）") }}</h2><p>{{ _("以下仅查询当前登录租户的决定元数据。误拦反馈来自现有会话人工复核，属于线索，不等于已经确认的规则误报；不会复制会话原文或自动重放。") }}</p><div class="table-wrap"><table><tr><th>{{ _("规则 ID") }}</th><th>{{ _("命中次数") }}</th><th>{{ _("关联“误报”会话复核") }}</th></tr>{% for item in daily %}<tr><td><code>{{ item.rule_id }}</code></td><td>{{ item.hits }}</td><td>{{ item.related_false_positive_reviews }}</td></tr>{% else %}<tr><td colspan="3">{{ _("暂无规则命中。") }}</td></tr>{% endfor %}</table></div></section>
+{% endblock %}

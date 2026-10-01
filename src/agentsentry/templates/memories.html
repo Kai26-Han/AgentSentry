@@ -1,0 +1,37 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("长期记忆") }}{% endblock %}
+{% block title_text %}{{ _("长期记忆") }}{% endblock %}
+{% block content %}
+<h1>{{ _("长期记忆") }}</h1>
+<p class="page-meta">{{ _("租户") }} <code>{{ tenant_id }}</code> {{ _("· 功能") }}{{ ('已开启' if enabled else '已关闭') | ui }}</p>
+<section><p><b>{{ _("留存提示：") }}</b>{{ _("preview 与 metadata 都会保存记忆文字。记忆始终是低信任数据；来源关联不证明内容真实。撤销只影响未来读取，不能收回已经进入当前会话的文字。") }}</p></section>
+<section>
+  <h2>{{ _("完整性异常") }}</h2>
+  <p>{{ _("签名缺失或不匹配的记忆不会提供给 Agent。历史记忆需要先人工复核；直接篡改的记忆可以清除，不能直接激活。") }}</p>
+  <table><tr><th>{{ _("对象") }}</th><th>{{ _("原因") }}</th><th>{{ _("发现时间") }}</th></tr>
+  {% for incident in incidents %}<tr><td>{{ ({'memory':'记忆','source_review':'来源审核'}.get(incident.entity_type,incident.entity_type)) | ui }} / <code>{{ incident.entity_id }}</code></td><td>{{ ({'legacy_unsealed':'升级前记录未签名，待人工复核','missing_seal':'签名缺失','seal_mismatch':'签名不匹配'}.get(incident.reason,incident.reason)) | ui }}</td><td>{{ incident.created_at }}</td></tr>
+  {% else %}<tr><td colspan="3">{{ _("暂无完整性异常") }}</td></tr>{% endfor %}</table>
+</section>
+<section>
+  <h2>{{ _("已审核的来源版本") }}</h2>
+  <p>{{ _("先打开调用详情核对原文，再填写该读取调用 ID。审核只信任具体内容版本；直接修改审核记录会使签名失效。") }}</p>
+  <form method="post" action="/dashboard/memory-sources/trust"><input type="hidden" name="csrf" value="{{ csrf }}"><label>{{ _("读取调用 ID") }} <input name="call_id" required size="42" placeholder="UUID"></label><button>{{ _("信任这份来源版本") }}</button></form>
+  <table><tr><th>{{ _("工具与资源") }}</th><th>{{ _("审核证据") }}</th><th>{{ _("状态") }}</th></tr>
+  {% for source in trusted_sources %}<tr><td>{{ source.tool }} / <code>{{ source.resource_id }}</code></td><td><a href="/dashboard/calls/{{ source.reviewed_call_id }}">{{ _("查看调用") }}</a><br><small>{{ _("内容哈希") }} {{ source.content_hash[:12] }}…</small></td><td>{{ ({'trusted':'已信任','revoked':'已撤销','untrusted':'完整性异常'}.get(source.status,source.status)) | ui }}{% if source.status == 'trusted' %}<form method="post" action="/dashboard/memory-sources/{{ source.id }}/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("撤销来源信任") }}</button></form>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="3">{{ _("暂无已审核的来源版本") }}</td></tr>{% endfor %}</table>
+</section>
+<section>
+  <h2>{{ _("记忆条目") }}</h2>
+  <table><tr><th>{{ _("记忆") }}</th><th>{{ _("状态与证据") }}</th><th>{{ _("操作") }}</th></tr>
+  {% for item in items %}<tr>
+    <td><b>{{ item.kind }}</b> · {{ (item.text or '文字不可展示或已清除') | ui }}<br><small>{{ _("创建") }} {{ item.created_at }} {{ _("· 到期") }} {{ item.expires_at }}</small></td>
+    <td>{{ ({'active':'可用','quarantined':'隔离','rejected':'拒绝','revoked':'已撤销','expired':'已过期','purged':'已清除','integrity_failed':'完整性异常'}.get(item.status,item.status)) | ui }} {{ _("· 低信任") }}<br>{{ _("原因：") }}{{ (item.findings | join('、') if item.findings else '无') | ui }}<br>{{ _("会话：") }}<a href="/dashboard/runtime-sessions/detail?agent_id=demo-agent&amp;session_id={{ item.origin_session_id | urlencode }}"><code>{{ item.origin_session_id }}</code></a><br>{% for call_id in item.source_call_ids %}{{ _("来源：") }}<a href="/dashboard/calls/{{ call_id }}"><code>{{ call_id }}</code></a><br>{% endfor %}</td>
+    <td>
+      {% if item.status == 'quarantined' and item.integrity_status == 'failed' and 'legacy_unverified' in item.findings %}<form method="post" action="/dashboard/memories/{{ item.id }}/review-legacy"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("复核历史记忆") }}</button></form>{% endif %}
+      {% if item.status == 'quarantined' and item.integrity_status == 'valid' %}<form method="post" action="/dashboard/memories/{{ item.id }}/decision"><input type="hidden" name="csrf" value="{{ csrf }}"><button name="action" value="activate">{{ _("人工激活") }}</button></form>{% endif %}
+      {% if item.status in ['active','quarantined'] and item.integrity_status == 'valid' %}<form method="post" action="/dashboard/memories/{{ item.id }}/decision"><input type="hidden" name="csrf" value="{{ csrf }}"><button name="action" value="revoke">{{ _("撤销") }}</button></form>{% endif %}
+      {% if item.text or item.status == 'integrity_failed' %}<form method="post" action="/dashboard/memories/{{ item.id }}/decision"><input type="hidden" name="csrf" value="{{ csrf }}"><button name="action" value="purge">{{ _("清除文字") }}</button></form>{% endif %}
+    </td>
+  </tr>{% else %}<tr><td colspan="3">{{ _("暂无长期记忆。历史会话不会补建记忆。") }}</td></tr>{% endfor %}</table>
+</section>
+{% endblock %}

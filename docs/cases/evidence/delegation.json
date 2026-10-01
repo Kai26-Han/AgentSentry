@@ -1,0 +1,385 @@
+{
+  "date": "2026-10-01",
+  "scope": "本机单跳公开合成资料只读委托",
+  "rules": {
+    "delegation": "delegation-rules-v1",
+    "data_flow": "data-flow-rules-v4",
+    "output": "output-rules-v6",
+    "threat_mapping": "1.9.0"
+  },
+  "full_regression": {
+    "passed": 238,
+    "seconds": 59.31
+  },
+  "fixed_replay": {
+    "runs": 2,
+    "identical": true,
+    "report": {
+      "sample_version": "delegation-lab-v1",
+      "status": "completed",
+      "results": [
+        {
+          "id": "D01",
+          "name": "拒绝资源扩大",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "parent_scope_invalid",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D02",
+          "name": "拒绝私有资源委托",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegated_resource_not_public",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D03",
+          "name": "拒绝秘密伪装公开资料",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegated_resource_not_public",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D04",
+          "name": "拒绝转委托",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "redelegation_forbidden",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D05",
+          "name": "消息被篡改后不能领取动作",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_message_tampered",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D06",
+          "name": "跨租户消息不能复用",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_integrity_failed",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D07",
+          "name": "父权限吊销后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_revoked_or_expired",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D08",
+          "name": "父会话结束后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "parent_session_closed",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D09",
+          "name": "协作身份轮换后旧委托失效",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "worker_identity_changed",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D10",
+          "name": "委托过期后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_revoked_or_expired",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D11",
+          "name": "父运行时暂停后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "parent_paused",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D12",
+          "name": "禁止协作工具写入",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "Capability delegation:delegated_scope_violation",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D13",
+          "name": "同调用 ID 换参数拒绝",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "相同调用 ID 参数冲突",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D14",
+          "name": "结果伪造来源拒绝",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_source_mismatch",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D15",
+          "name": "协作结果伪造批准被阻断",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "协作结果伪造授权被阻断",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D16",
+          "name": "完成后换结果冲突",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_result_conflict",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D17",
+          "name": "父令牌额度不足不能重复分配",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "parent_capability_exhausted",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D18",
+          "name": "结果文字被篡改不能传递",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_result_integrity_failed",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D19",
+          "name": "来源转为私有后不能传递",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_source_reclassified",
+            "上游调用数": 1,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D20",
+          "name": "权限缓存消失后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "Capability delegation:parent_capability_unavailable",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D21",
+          "name": "普通工具接口不能用协作身份绕过",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "协作身份不能使用普通接口",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "D22",
+          "name": "撤销委托后停止读取",
+          "passed": true,
+          "evidence": {
+            "拒绝依据": "delegation_revoked_or_expired",
+            "上游调用数": 0,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "N01",
+          "name": "正常文档读取及父输出复核",
+          "passed": true,
+          "evidence": {
+            "上游调用数": 1,
+            "父输出检查": "allow",
+            "原始来源数": 1,
+            "回复为低信任": true,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "N02",
+          "name": "同委托请求幂等不再扣额度",
+          "passed": true,
+          "evidence": {
+            "上游调用数": 1,
+            "父输出检查": "allow",
+            "原始来源数": 1,
+            "回复为低信任": true,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "N03",
+          "name": "同调用重试不重复读取",
+          "passed": true,
+          "evidence": {
+            "上游调用数": 1,
+            "父输出检查": "allow",
+            "原始来源数": 1,
+            "回复为低信任": true,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        },
+        {
+          "id": "N04",
+          "name": "正常 MCP 固定卡片读取",
+          "passed": true,
+          "evidence": {
+            "上游调用数": 1,
+            "父输出检查": "allow",
+            "原始来源数": 1,
+            "回复为低信任": true,
+            "禁止的工具副作用": 0,
+            "完成调用审计缺失": 0
+          }
+        }
+      ]
+    }
+  },
+  "postgres_redis": {
+    "environment": "真实 PostgreSQL／Redis 临时租户 schema",
+    "passed": true,
+    "四并发预留": {
+      "允许": 2,
+      "额度耗尽": 2,
+      "父剩余次数": 0
+    },
+    "四次同调用重试": {
+      "完成响应": 4,
+      "实际读取记录": 1,
+      "结果审计": 1
+    },
+    "禁止写入副作用": 0
+  },
+  "original_regression": {
+    "offline_cases": 31,
+    "default_policy_cases": 13,
+    "threats_validated": 15,
+    "owasp_categories": 10,
+    "mcp_dependencies": "通过"
+  },
+  "not_verified": [
+    "不同模型协作与语义改写污染率",
+    "多跳或跨主机委托",
+    "写入委托与审批继承",
+    "应用密钥与数据库同时失陷"
+  ],
+  "web": {
+    "健康与就绪": true,
+    "默认面板固定样本": 26,
+    "现场研究委托": 3,
+    "父子会话与行动链及原始调用链接": true,
+    "研究观察只读": true,
+    "摘要默认遮盖与显式脱敏预览": true,
+    "TH-015关联": true,
+    "当前入口和专题本地文件链接": 206
+  },
+  "live": {
+    "kind": "真实本机 HTTP／独立进程／本地 MCP",
+    "禁止的工具副作用": 0,
+    "核对调用的审计／Outbox缺失": 0,
+    "passed": true,
+    "runs": [
+      {
+        "tool": "read_document",
+        "status": "completed",
+        "父已接收低信任结果": true,
+        "独立进程": true
+      },
+      {
+        "tool": "mcp_lookup_card",
+        "status": "completed",
+        "父已接收低信任结果": true,
+        "独立进程": true
+      },
+      {
+        "tool": "read_document",
+        "status": "blocked"
+      }
+    ]
+  },
+  "public_export": {
+    "说明": "公开案例验证摘要；不分发凭据、个人学习记录、研究租户与会话标识或原始运行轨迹。",
+    "重新验证": false,
+    "原始证据": "仅保存在原作者本机，未随此副本分发；请运行提供的实验和测试自行复现。"
+  }
+}

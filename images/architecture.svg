@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1110" viewBox="0 0 1600 1110" role="img" aria-labelledby="title desc">
+<title id="title">AgentSentry 整体架构：安全检查、执行与证据</title>
+<desc id="desc">用户任务和研究样本进入示例 Agent，可信适配层请求安全网关检查。网关决定工具执行与模型发送、回答展示和记忆读写。适配层实际请求模型，获准工具在执行端运行。PostgreSQL 审计与 Outbox 驱动异步 Judge 和告警，Web 展示证据与管理操作。独立只读协作 Agent 通过缩减权限接入网关。</desc>
+<defs>
+ <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#45657d"/></marker>
+ <marker id="back" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#168579"/></marker>
+</defs>
+<style>
+ text {font-family: 'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif;fill:#153448}
+ .head {font-size:26px;font-weight:700}
+ .body {font-size:22px;fill:#466174}
+ .label {font-size:19px;fill:#45657d}
+ .small {font-size:19px;fill:#617b8b}
+</style>
+<rect width="1600" height="1110" fill="#f3f7fb"/>
+<rect x="0" y="0" width="1600" height="86" fill="#153448"/>
+<text x="60" y="55" style="font-size:34px;font-weight:700;fill:#fff">AgentSentry</text>
+<text x="330" y="55" style="font-size:24px;fill:#d3e4ee">从安全检查到实际执行，再到可追溯证据</text>
+
+<rect x="60" y="130" width="270" height="115" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<text x="82" y="172" class="head">用户任务</text>
+<text x="82" y="212" class="body">日常任务 / 合成输入</text>
+<rect x="395" y="130" width="330" height="115" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<text x="417" y="172" class="head">模型服务</text>
+<text x="417" y="212" class="body">本地 / 已登记远程模型</text>
+<rect x="60" y="350" width="270" height="180" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<rect x="60" y="368" width="5" height="144" rx="2" fill="#5d879f"/>
+<text x="82" y="392" class="head">示例 Agent</text>
+<text x="82" y="432" class="body">理解任务、提出调用</text>
+<text x="82" y="467" class="body">生成回答与记忆候选</text>
+<rect x="395" y="350" width="330" height="180" rx="16" fill="#edf6fc" stroke="#8fb8d2" stroke-width="2"/>
+<rect x="395" y="368" width="5" height="144" rx="2" fill="#3482ad"/>
+<text x="417" y="392" class="head">可信适配层</text>
+<text x="417" y="432" class="body">持有凭据与会话绑定</text>
+<text x="417" y="467" class="body">提交检查、发送准许消息</text>
+<text x="417" y="502" class="body">展示网关准许的回答</text>
+<rect x="790" y="290" width="390" height="300" rx="16" fill="#eaf7f2" stroke="#65aa96" stroke-width="2"/>
+<rect x="790" y="308" width="5" height="264" rx="2" fill="#168579"/>
+<text x="812" y="332" class="head">FastAPI 安全网关</text>
+<text x="812" y="372" class="body">身份 / 权限 / 工具策略</text>
+<text x="812" y="407" class="body">审批 / 运行时 / 行动预算</text>
+<text x="812" y="442" class="body">模型出口 / 输出 / 记忆检查</text>
+<text x="812" y="477" class="body">决定与审计先提交</text>
+<rect x="812" y="541" width="344" height="31" rx="8" fill="#d7eee4"/>
+<text x="825" y="564" class="small" style="fill:#186756;font-size:20px;">Redis：权限与次数原子校验</text>
+<rect x="1245" y="290" width="295" height="300" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<rect x="1245" y="308" width="5" height="264" rx="2" fill="#64829a"/>
+<text x="1267" y="332" class="head">获准工具执行</text>
+<text x="1267" y="372" class="body">固定本地模拟工具</text>
+<text x="1267" y="407" class="body">本地 MCP（stdio）</text>
+<text x="1267" y="442" class="body">登记远程 MCP / GitHub</text>
+<text x="1267" y="477" class="body">受限 Docker 沙箱</text>
+<polyline points="195,245 195,350" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="210" y="307" class="label">任务</text>
+<polyline points="330,422 395,422" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="336" y="400" class="label">提案</text>
+<polyline points="395,477 330,477" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round"/>
+<text x="337" y="506" class="label" style="fill:#168579;">结果</text>
+<polyline points="525,350 525,245" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="420" y="285" class="label">准许消息</text>
+<polyline points="615,245 615,350" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round"/>
+<text x="628" y="310" class="label" style="fill:#168579;">模型结果</text>
+<polyline points="725,416 790,416" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="729" y="392" class="label">检查</text>
+<polyline points="790,492 725,492" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round"/>
+<text x="730" y="522" class="label" style="fill:#168579;">决定</text>
+<polyline points="1180,393 1245,393" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="1184" y="369" class="label">执行</text>
+<polyline points="1245,496 1180,496" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round"/>
+<text x="1184" y="526" class="label" style="fill:#168579;">来源</text>
+<rect x="60" y="670" width="270" height="135" rx="16" fill="#f0eef9" stroke="#c7bedc" stroke-width="2"/>
+<text x="82" y="712" class="head">攻防实验运行器</text>
+<text x="82" y="752" class="body">固定重放 / 真实模型</text>
+<text x="82" y="787" class="body">版本化样本与正常对照</text>
+<polyline points="195,670 195,530" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="211" y="613" class="label">新的测试任务</text>
+<rect x="395" y="670" width="330" height="135" rx="16" fill="#f0eef9" stroke="#c7bedc" stroke-width="2"/>
+<text x="417" y="712" class="head">只读协作 Agent</text>
+<text x="417" y="752" class="body">独立身份、单跳委托</text>
+<text x="417" y="787" class="body">缩减权限、低信任结果</text>
+<polyline points="725,723 755,723 755,570 790,570" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="540" y="639" class="label">委托协议 → 同一网关</text>
+<rect x="790" y="670" width="390" height="135" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<text x="812" y="712" class="head">PostgreSQL</text>
+<text x="812" y="752" class="body">操作记录 / 长期记忆</text>
+<text x="812" y="787" class="body">审计事件 / 事务 Outbox</text>
+<polyline points="990,590 990,670" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="1006" y="636" class="label">提交证据</text>
+<rect x="1245" y="670" width="295" height="135" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<text x="1267" y="712" class="head">异步分析与维护</text>
+<text x="1267" y="752" class="body">Dispatcher / Celery</text>
+<text x="1267" y="787" class="body">Judge、告警与威胁关联</text>
+<polyline points="1180,709 1245,709" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="1186" y="685" class="label">投递</text>
+<polyline points="1245,770 1180,770" fill="none" stroke="#168579" stroke-width="2.6" stroke-dasharray="7 6" marker-end="url(#back)" stroke-linejoin="round"/>
+<text x="1186" y="799" class="label" style="fill:#168579;">结果</text>
+<rect x="790" y="895" width="750" height="125" rx="16" fill="#fff" stroke="#cbdce7" stroke-width="2"/>
+<text x="812" y="937" class="head">Web 控制台（网关内）</text>
+<text x="812" y="977" class="body">会话调查、事实卡审批、记忆与数据流管理、实验报告</text>
+<polyline points="990,805 990,895" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="1006" y="855" class="label">关联记录</text>
+<polyline points="1390,805 1390,895" fill="none" stroke="#45657d" stroke-width="2.6" marker-end="url(#arrow)" stroke-linejoin="round"/>
+<text x="1406" y="855" class="label">分析状态</text>
+<rect x="60" y="875" width="665" height="145" rx="16" fill="#e9f0f5"/>
+<text x="83" y="909" class="head">读图要点</text>
+<text x="83" y="945" class="body">模型提出动作；网关作安全判定。</text>
+<text x="83" y="978" class="body">适配层请求模型；执行端运行获准工具。</text>
+<text x="83" y="1011" class="body">Judge 提供事后信号，不参与同步授权。</text>
+<line x1="60" y1="1057" x2="1540" y2="1057" stroke="#cfdee7"/>
+<text x="60" y="1090" class="small">实线：请求、执行与留证     虚线：返回决定与结果</text>
+<text x="790" y="1090" class="small">保护范围：显式接入路径；完整流程见架构文档</text>
+</svg>

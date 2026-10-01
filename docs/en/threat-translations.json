@@ -1,0 +1,384 @@
+{
+  "source_sha256": "9bb1a336ec82f5e34417623dd99d3857f43a2bee813090b99bec1dd2474e632a",
+  "mapping_version": "1.9.0",
+  "categories": {
+    "ASI01": {
+      "note": "Document and MCP content may affect task selection or answers. Known synthetic payload delivery is separately recorded, without inferring obedience."
+    },
+    "ASI02": {
+      "note": "Fixed tools can be induced to read, write or simulate sending; model egress is an Agent-triggered external action. Findings apply to explicit integrations."
+    },
+    "ASI03": {
+      "note": "Tenant identity/resource boundaries have evidence; external identity providers and other Agents are not covered."
+    },
+    "ASI04": {
+      "note": "Fixed HTTPS MCP is integrated. Controlled local TLS/OAuth tests cover identity/manifest boundaries; official GitHub fixed reads and one human-approved write were performed. Connectivity is not proof of internal code, response semantics or long-term supply-chain safety."
+    },
+    "ASI05": {
+      "note": "Default tenant has a restricted shell demonstration; container constraints are not a production sandbox guarantee."
+    },
+    "ASI06": {
+      "note": "Cross-session and storage-tamper samples exist; semantic paraphrase and simultaneous application-key compromise remain outside scope."
+    },
+    "ASI07": {
+      "note": "Local single-hop read-only identity, sealed messages and attenuated authority are implemented; cross-host, multihop and semantic truth unverified."
+    },
+    "ASI08": {
+      "note": "Single-Agent service-chain breakers, queue backoff and isolation tests exist; cross-Agent/distributed cascades remain unverified."
+    },
+    "ASI09": {
+      "note": "Approval fact cards and contaminated answers involve human trust. Automated page tests cannot establish administrator resistance to deception."
+    },
+    "ASI10": {
+      "note": "Single-Agent loops and write budgets have boundary tests; sustained autonomous violation without attacker input remains unverified."
+    }
+  },
+  "threats": {
+    "TH-001": {
+      "title": "Low-trust material contaminates the final answer",
+      "entry": "Actual document and MCP-card reads",
+      "asset": "Displayed answer and user trust",
+      "scope": "Explicit demo Agent; original fixed A12 display failed, later scripted fix blocks it; three local A06 runs did not trigger contamination",
+      "limitation": "Finite explicit-action/opaque-payload parsing only; paraphrases, unintegrated paths and live triggering of this rule remain limits.",
+      "controls": [
+        "Pre-display answer check",
+        "Extract action payloads from actual sources and compare with answer",
+        "Advisory goal-drift evidence"
+      ],
+      "evidence": [
+        "Dangerous sending was pending then rejected, but a draft marker reached eligible display.",
+        "Three local runs did not reproduce display contamination; this does not cancel the fixed gap.",
+        "Both post-fix scripted rounds blocked display, with zero sending effects/audit gaps; old contamination retained.",
+        "Regression covers binding, normal quotation, decoys, paraphrases and recoverable encoding.",
+        "Three qwen3:0.6b runs generated no marker or dangerous proposal; this track alone does not validate the fix.",
+        "Explicit override echo tightened from warn to block; attributed quotes/public controls remain, two retests consistent."
+      ]
+    },
+    "TH-002": {
+      "title": "MCP cards induce unauthorized tool proposals",
+      "entry": "Synthetic local MCP results",
+      "asset": "Tool effects and other card resources",
+      "scope": "Fixed local stdio adapter and registered tools, not arbitrary remote MCP",
+      "limitation": "Fixed proposals establish post-entry decisions; actual model attempts must be measured independently.",
+      "controls": [
+        "Fixed upstream tools/result schemas",
+        "Gateway capabilities, policy and approval"
+      ],
+      "evidence": [
+        "Scripted card-induced writes and out-of-scope reads tested gateway boundaries.",
+        "Three local MCP attack types produced no dangerous proposal; no live after-attempt blocking denominator.",
+        "Regression covers unknown tools, invalid results and pre-approval writes."
+      ]
+    },
+    "TH-003": {
+      "title": "Agent authority used across tenants or resource scope",
+      "entry": "Tenant identity, capability and resource parameters",
+      "asset": "Other-tenant data and unauthorized resources",
+      "scope": "Demo Agent, fixed tools, current tenant schemas and bounded capabilities",
+      "limitation": "Does not establish safety for arbitrary Agents, external identity providers or direct bypass calls.",
+      "controls": [
+        "Tenant-bound atomic capability checks",
+        "Typed resource/identity verification"
+      ],
+      "evidence": [
+        "Cross-tenant tokens and wrong resources produced no unauthorized effects.",
+        "Regression covers tenant-separated documents, calls, grants and Web."
+      ]
+    },
+    "TH-004": {
+      "title": "Malicious sources enter long-term cross-session memory",
+      "entry": "Document/MCP content submitted as automatic memory candidates",
+      "asset": "Later normal context and answers",
+      "scope": "Demo memory write, quarantine and recall chain",
+      "limitation": "Unrecognized semantic variants remain; revocation cannot retract in-flight context.",
+      "controls": [
+        "Source verification, quarantine and revocation",
+        "Memory integrity checks"
+      ],
+      "evidence": [
+        "Explicit forged roles, persistent instructions and contamination cases are checked.",
+        "Regression covers quarantine, revoke and recall boundaries.",
+        "Actual PostgreSQL three-session checks for unreviewed sources, replacement, revoke and resummarization matched twice; two six-attack/six-control local-model sets reported separately."
+      ]
+    },
+    "TH-005": {
+      "title": "Stored memory or source-review records are modified",
+      "entry": "Direct tenant-table/state edits",
+      "asset": "Memory text, active state and trusted-source records",
+      "scope": "Database row modification without the application signing key",
+      "limitation": "The integrity boundary fails if the signing key/application are also compromised.",
+      "controls": [
+        "Tenant-bound HMAC integrity",
+        "Read-time verification and anomaly quarantine"
+      ],
+      "evidence": [
+        "Text/state/source-review modification and signature removal were detected."
+      ]
+    },
+    "TH-006": {
+      "title": "Private data leaks through writes, answers or simulated sending",
+      "entry": "Private reads followed by task/note/send/output exits",
+      "asset": "Private documents and tenant data boundaries",
+      "scope": "Synthetic resources, registered tools/display; restricted-session free text tightened; sending remains local simulation",
+      "limitation": "No real sending; unrelated restricted-session answers are blocked, with no verified display template/manual release flow; wrong classification/bypass paths remain.",
+      "controls": [
+        "Synchronous sensitive-source/tool-egress checks",
+        "Pre-execution approval and frozen-parameter recheck",
+        "Block whole free-text answers after private/unknown/secret reads; unrelated answers can be blocked"
+      ],
+      "evidence": [
+        "Simulated sending denied; sensitive writing denied/reviewed; zero forbidden effects.",
+        "Two normal tasks remain restricted; no safe relaxation yet.",
+        "Both rounds confirmed word/arithmetic paraphrases displayed; simulated send/remote-model checks denied with zero remote sends, not proof a model generated these drafts.",
+        "Two post-fix real-gateway rounds blocked all three forms, preserved public display and counted unrelated-normal blocks.",
+        "Covers private semantic paraphrase, public controls and normal private-task friction.",
+        "Restricted-answer blocking prevented summary initiation; historical v1 results retained."
+      ]
+    },
+    "TH-007": {
+      "title": "Private context reaches an unapproved remote model",
+      "entry": "Demo model pre-send path",
+      "asset": "Private information, personal data and credentials",
+      "scope": "Registered model destinations and explicit adapter sending function",
+      "limitation": "No real third-party remote send experiment in current evidence; semantic secrets may be missed.",
+      "controls": [
+        "Model-exit classification and synchronous denial"
+      ],
+      "evidence": [
+        "Controlled doubles verified sensitive remote-context blocking, with no real remote-model sending."
+      ],
+      "atlas_note": "ATLAS Exfiltration via AI Inference API mainly describes extracting training data through an inference interface, not sending private context to a provider."
+    },
+    "TH-008": {
+      "title": "Low-trust material fabricates approval authority",
+      "entry": "Authorization claims in documents, cards or parameters",
+      "asset": "Administrator judgment and frozen action",
+      "scope": "Web fact cards and existing admin API, not human cognitive effectiveness",
+      "limitation": "Authenticated admins can use the ordinary API; automated tests cannot prove humans resist manipulation.",
+      "controls": [
+        "Authority-forgery/goal clues",
+        "Fact card and short-lived confirmation",
+        "Refresh under approval lock, serialize revoke/approve and recheck expiry before decision"
+      ],
+      "evidence": [
+        "Fixed proposals/source claims recorded separately; zero forbidden pre-approval effects.",
+        "Replacement, state changes, replay, expiry and CSRF checked.",
+        "Stale double-approval entity fixed; two actual PG/Redis rounds produced no duplicate/out-of-scope effects.",
+        "Revoke/expiry probes each produced one forbidden pre-fix synthetic write; shared row lock/final expiry check passed twice afterward; no human-deception conclusion.",
+        "Regression covers preloaded cache, failed Redis revoke cleanup and expiry during commit/approval checking."
+      ]
+    },
+    "TH-009": {
+      "title": "Shell tools cause unexpected code execution",
+      "entry": "Default-tenant run_shell proposal",
+      "asset": "Sandbox, host and tenant boundaries",
+      "scope": "Default restricted Docker shell; other tenants deny shared shell",
+      "limitation": "Container drills do not establish resistance to runtime escape or production-grade isolation.",
+      "controls": [
+        "Separate constrained execution service",
+        "Frozen-parameter approval and tool checks"
+      ],
+      "evidence": [
+        "Pre-approval zero execution, parameter conflict, read-only root and network syscall limits exercised.",
+        "New tenants denied shared sandbox calls."
+      ]
+    },
+    "TH-010": {
+      "title": "Remote MCP definitions, implementation or results are poisoned",
+      "entry": "Registered HTTPS MCP and fixed official GitHub adapters",
+      "asset": "Tool definitions, results, credentials and subsequent actions",
+      "scope": "Fixed tenant-OAuth TLS synthetic server; default-tenant GitHub reads/test-repo write use independent PATs; one approved actual write, not arbitrary third-party or cross-tenant GitHub credentials",
+      "limitation": "Validated IP pinned to TCP and selection tested; public rebinding/other network stacks unverified. One synthetic probe cannot prove remote program/all responses. GitHub remains fixed/default-tenant; revised parser has no second actual write.",
+      "controls": [
+        "Fixed local stdio tools and schemas",
+        "Fixed HTTPS/OAuth claims, manifest/probe, validated-IP connection, result checks and fail-closed errors",
+        "Tenant versioned profiles, observations, human review and rollback; new tools need code",
+        "Fixed official GitHub endpoints/definitions/resources, separate read/write PATs, bounded results and readonly reconciliation",
+        "Capabilities, approval, call idempotency and unknown results",
+        "Remote source classification and sensitive-write checks"
+      ],
+      "evidence": [
+        "Local stdio regression continued after SDK 2.2.0 migration.",
+        "Controlled HTTPS/OAuth verifies manifest/review/probe, tenant registration, no pre-approval writes, dedup and audit.",
+        "Profile approve/rollback, forbidden online additions/schema changes, endpoint drift and pinned-IP assertions.",
+        "Controlled manifest/behavior/network-target observations, with third-party implementation limits.",
+        "Local TLS/OAuth deployment facts do not establish cross-host generic interoperability; GitHub separately uses PAT.",
+        "Actual official GitHub fixed LICENSE read with definition/gateway/source/audit/Judge linkage, not all tools/services.",
+        "Three local Issue analyses made no dangerous proposal and blocked normal summaries; live tool blocking unverified, false-block candidates.",
+        "Dedicated private-repo Issue count zero before approval and one after; unknown reconciled as completed with original event, no rewrite or second actual parser check.",
+        "Regression covers fixed read identity/parameters/replay, not long-term remote code stability.",
+        "Protocol doubles verify create-only fixed parameters, drift, zero pre-approval effects, rejection/idempotency and dispatched-timeout unknown.",
+        "Formal SDK/stdio doubles verify definitions/resources/results/byte cap/post-dispatch failure and no repeated write, not third-party field evidence."
+      ]
+    },
+    "TH-011": {
+      "title": "Agent persistently departs from the task without attacker input",
+      "entry": "Autonomous multistep task/tool choice",
+      "asset": "User goal, effects and session trust",
+      "scope": "Fixed wrong proposals without malicious sources and budget pressure exist; naturally emerging long-term drift not observed",
+      "limitation": "Needs independently designed attacker-free multistep tasks and factual side-effect scoring.",
+      "controls": [
+        "Current single-call/answer advisory analysis"
+      ],
+      "evidence": [
+        "Goal lab mainly covers planted source inducement, not sustained autonomous violations.",
+        "Explicit negative-task profile gap fixed as an advisory clue; authorized wrong actions may still execute, not proof autonomous drift is prevented."
+      ],
+      "atlas_note": "ATLAS models adversary behavior; ordinary autonomous model error without attacker input is not forced into a technique."
+    },
+    "TH-012": {
+      "title": "Known synthetic document injection reaches Agent sources",
+      "entry": "Completed read_document returns fixed injected-guide",
+      "asset": "Subsequent tool choice, answer and user task",
+      "scope": "Only actual return of one built-in fixture, not model obedience",
+      "limitation": "Only this fixture recognized; other documents, obedience and output contamination need independent evidence.",
+      "controls": [
+        "Fixed synthetic document/read result",
+        "Calls remain subject to capabilities/policy",
+        "Later answers receive display checks"
+      ],
+      "evidence": [
+        "Verify committed result, original call and fixture content; only actual returned fixture becomes an exposure clue.",
+        "Judge alert links to result event, but labels do not prove effects or answer contamination."
+      ]
+    },
+    "TH-013": {
+      "title": "Bound Agent loops, probes resources or accumulates writes",
+      "entry": "Continuous explicit tool proposals and model sends",
+      "asset": "Tool effects, access, model exits and availability",
+      "scope": "One validly bound Agent with synthetic tools and registered model exits",
+      "limitation": "Legacy unbound clients lack budget protection; within-budget errors need other controls; cross-Agent cascades/attacker-free drift not established.",
+      "controls": [
+        "Deterministic session/Agent budgets, probe pause and audit",
+        "Submission/approval rechecks",
+        "Model pre-send budget checks"
+      ],
+      "evidence": [
+        "Both 30-case fixed rounds matched; zero forbidden effects/audit gaps.",
+        "Twelve qwen3:0.6b document/MCP sessions; one actual write-budget trigger, other budgets insufficiently triggered.",
+        "Idempotency, reserved write uses, cross-session counts, resume/model/tenant checks.",
+        "Two actual PG/Redis/HTTP rounds: eight competitors for three writes, four-session ten-write total and probing pause; separate 12-task model set, no other-Agent generalization."
+      ],
+      "atlas_note": "Fixed pressure proposals/user pressure prompts do not prove an adversary; generic loops/model error are not forced into ATLAS techniques."
+    },
+    "TH-014": {
+      "title": "Dependency failure, overload and retry amplification cascade",
+      "entry": "Integrated MCP, sandbox and asynchronous Judge/notification dependencies",
+      "asset": "Check availability, audit integrity and effect state",
+      "scope": "Single-Agent local explicit service chain; temporary DB/controlled fault doubles",
+      "limitation": "Shared host/DB/Redis are global failure domains; no strict quotas, long third-party overload, every cascade or cross-Agent guarantee.",
+      "controls": [
+        "Tenant breakers, execution leases, processing generations and safe retry",
+        "Tenant/phase delivery isolation and persistent backoff",
+        "Separate Judge and notification queues/workers"
+      ],
+      "evidence": [
+        "Doubles cover fail-closed decisions, unknown, breaker recovery, backoff, duplicates, late results and normal local controls.",
+        "Additional tenant isolation, expired leases, crash cap and ready-record progress.",
+        "Temporary PostgreSQL concurrency and real dedicated Redis queue: publish failure/backlog/worker recovery/original-event dedup, without stopping daily services."
+      ],
+      "atlas_note": "Evidence establishes availability/recovery boundaries, not a verified adversary technique; no forced ATLAS mapping."
+    },
+    "TH-015": {
+      "title": "Delegation impersonation, excess authority and reply poisoning",
+      "entry": "Local parent-to-fixed-reader messages and summaries",
+      "asset": "Parent uses, public resource scope, parent context and display",
+      "scope": "Same tenant, independent identities, single-hop read-only, two fixed tools and synthetic public data",
+      "limitation": "Fixed non-model reader only; cross-host/multihop/write-approval inheritance/paraphrases/joint key compromise unverified.",
+      "controls": [
+        "Attenuated parent scope, reserved uses, seals, time/revoke/result integrity",
+        "Independent identity protocol, admin operations and tenant checks",
+        "Parent inherits actual reads/reply sources, retaining exit controls"
+      ],
+      "evidence": [
+        "Fixed single-hop attacks/controls, with results in delegation case; not multi-model semantic proof.",
+        "Inherited uses, complete-source exits, sensitive-result withholding and conservative failed-commit reservation.",
+        "Identity substitution, ordinary-API bypass, CSRF, cross-tenant, formal client and evidence links."
+      ],
+      "atlas_note": "Controlled identity/message tests do not establish a specific verified adversary ATLAS technique; no forced mapping."
+    }
+  },
+  "runtime_signals": {
+    "delegation_result_poison": {
+      "title": "Reply contains explicit instructions/forged authority, blocked before display"
+    },
+    "delegation_scope_tamper": {
+      "title": "Delegation seal does not match the message"
+    },
+    "dependency_circuit_opened": {
+      "title": "Repeated dependency failures open breaker"
+    },
+    "queue_processing_exhausted": {
+      "title": "Repeated expired asynchronous leases exhaust retries"
+    },
+    "action_chain_tool_loop": {
+      "title": "Session tool proposal budget exceeded"
+    },
+    "action_chain_write_loop": {
+      "title": "Session or Agent write proposal budget exceeded"
+    },
+    "action_chain_agent_write_loop": {
+      "title": "Agent cross-session write budget exceeded"
+    },
+    "action_chain_probe": {
+      "title": "Different unauthorized resources repeatedly probed"
+    },
+    "action_chain_model_loop": {
+      "title": "Session model request budget exceeded"
+    },
+    "remote_mcp_manifest_drift": {
+      "title": "Registered remote manifest changed"
+    },
+    "remote_mcp_profile_drift": {
+      "title": "Approved remote endpoint identity changed"
+    },
+    "remote_mcp_behavior_drift": {
+      "title": "Synthetic read-only behavior probe changed"
+    },
+    "remote_mcp_observed_change": {
+      "title": "Administrator/call observed remote registration changes"
+    },
+    "remote_mcp_observed_identity_change": {
+      "title": "Administrator observed endpoint identity change"
+    },
+    "remote_mcp_canary_incident": {
+      "title": "Administrator/call observed probe anomaly"
+    },
+    "injected_fixture_delivered": {
+      "title": "Known synthetic injected document actually returned"
+    },
+    "answer_instruction_echo": {
+      "title": "Source output instruction appears in answer"
+    },
+    "answer_action_payload_echo": {
+      "title": "Source action payload appears in answer"
+    },
+    "mcp_action_inducement": {
+      "title": "MCP card induces a tool action"
+    },
+    "invalid_session_binding": {
+      "title": "Invalid session identity attempt"
+    },
+    "memory_instruction_quarantined": {
+      "title": "Memory instruction quarantined"
+    },
+    "memory_integrity_failure": {
+      "title": "Memory/source-review integrity anomaly"
+    },
+    "private_external_attempt": {
+      "title": "Simulated sending attempted after private source"
+    },
+    "restricted_answer_blocked": {
+      "title": "Answer blocked after restricted source"
+    },
+    "remote_model_sensitive_block": {
+      "title": "Sensitive remote-model context denied"
+    },
+    "approval_authority_spoof": {
+      "title": "Source claims forged approval authority"
+    },
+    "approval_argument_claim": {
+      "title": "Tool parameters claim prior approval"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("总览") }}{% endblock %}
+{% block title_text %}{{ _("总览") }}{% endblock %}
+{% block content %}
+<h1>{{ _("总览") }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 先处理待办，再查看会话和研究证据。") }}</p>
+<div class="grid">
+  <section><div class="muted">{{ _("待审批") }}</div><div class="metric">{{ shell_pending_approvals }}</div><a href="/dashboard/approvals">{{ _("查看审批") }}</a></section>
+  <section><div class="muted">{{ _("未处理告警") }}</div><div class="metric">{{ shell_open_alerts }}</div><a href="/dashboard/alerts">{{ _("查看告警") }}</a></section>
+  <section><div class="muted">{{ _("Outbox 待处理／失败") }}</div><div class="metric">{{ outbox_counts.get('pending', 0) + outbox_counts.get('failed', 0) }}</div><a href="/dashboard/system">{{ _("查看运行状态") }}</a></section>
+  <section><div class="muted">{{ _("当前运行 Judge") }}</div><div class="metric" style="font-size:18px">{{ judge_provider }}</div><a href="/dashboard/judge-runtime">{{ _("查看运行设置") }}</a></section>
+</div>
+<section><h2>{{ _("最近风险会话") }}</h2><div class="table-wrap"><table><tr><th>{{ _("最近活动") }}</th><th>{{ _("会话") }}</th><th>{{ _("状态") }}</th><th>{{ _("风险线索") }}</th></tr>
+{% for item in sessions %}<tr><td>{{ item.last_activity_at }}</td><td><a href="/dashboard/runtime-sessions/detail?agent_id={{ item.agent_id | urlencode }}&amp;session_id={{ item.session_id | urlencode }}"><code>{{ item.session_id }}</code></a></td><td>{{ (item.status) | ui }}</td><td>{{ (item.signals[0].label if item.signals else '待复核') | ui }}</td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无风险会话。") }}</td></tr>{% endfor %}</table></div><p><a href="/dashboard/runtime-sessions">{{ _("查看全部会话 →") }}</a></p></section>
+<section><h2>{{ _("最近未处理告警") }}</h2><div class="table-wrap"><table><tr><th>{{ _("时间") }}</th><th>{{ _("级别") }}</th><th>{{ _("风险") }}</th><th>{{ _("调用证据") }}</th></tr>
+{% for alert in alerts %}<tr><td>{{ alert.created_at }}</td><td class="danger">{{ alert.severity }}</td><td>{{ (alert.title) | ui }}</td><td>{% if alert.call_id %}<a href="/dashboard/calls/{{ alert.call_id }}"><code>{{ alert.call_id }}</code></a>{% else %}{{ _("无关联调用") }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无未处理告警。") }}</td></tr>{% endfor %}</table></div><p><a href="/dashboard/alerts">{{ _("查看全部告警 →") }}</a></p></section>
+<section><h2>{{ _("运行状态") }}</h2><p>Outbox：{% for status,count in outbox_counts.items() %}{{ status }} {{ count }}　{% else %}{{ _("暂无事件") }}{% endfor %}</p><p>Webhook：{% for status,count in webhook_counts.items() %}{{ status }} {{ count }}　{% else %}{{ _("未配置或暂无投递") }}{% endfor %}</p><a href="/dashboard/system">{{ _("查看系统与演示数据 →") }}</a></section>
+{% endblock %}

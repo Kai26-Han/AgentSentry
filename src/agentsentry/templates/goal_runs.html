@@ -1,0 +1,8 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("目标偏移实验") }}{% endblock %}
+{% block title_text %}{{ _("目标偏移实验") }}{% endblock %}
+{% block content %}
+<h1>{{ _("Agent 攻击实验 · 目标偏移") }}</h1><p class="page-meta">{{ _("固定样本重放与真实模型行为分别统计。数据租户") }} <code>{{ tenant_id }}</code>{{ _("；登录租户始终按顶部显示。") }}</p>
+{% if choices %}<section><h2>{{ _("选择研究租户") }}</h2><form method="get"><select name="tenant"><option value="{{ shell_tenant_id }}">{{ _("当前登录租户") }}</option>{% for choice in choices %}<option value="{{ choice.id }}" {% if choice.id == tenant_id %}selected{% endif %}>{{ choice.name }} · {{ choice.id }}</option>{% endfor %}</select><button>{{ _("查看") }}</button></form></section>{% endif %}
+<section><table><tr><th>{{ _("运行") }}</th><th>{{ _("模式") }}</th><th>{{ _("状态") }}</th><th>{{ _("样本与模型") }}</th></tr>{% for run in runs %}<tr><td><a href="/dashboard/goal-runs/{{ run.id }}?tenant={{ tenant_id }}"><code>{{ run.id }}</code></a></td><td>{{ run.mode }}</td><td>{{ (run.status) | ui }}</td><td>{{ run.corpus_version }} · {{ (run.model_name or '固定提案') | ui }}</td></tr>{% else %}<tr><td colspan="4">{{ _("此租户暂无实验结果。使用") }} <code>agentsentry-goal-lab</code> {{ _("从命令行启动实验。") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

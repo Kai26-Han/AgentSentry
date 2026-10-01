@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("合成来源详情") }}{% endblock %}
+{% block title_text %}{{ _("合成来源详情") }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/memory-security-runs?tenant={{ tenant_id }}">{{ _("← 返回记忆安全机制实验") }}</a></p>
+<h1>{{ _("合成来源") }} {{ case_id }}</h1>
+<section><p>{{ _("研究租户") }} <code>{{ tenant_id }}</code> {{ _("· 实验") }} <code>{{ run_id }}</code>{% if observer %} {{ _("· 默认管理员只读查看") }}{% endif %}</p>
+<p>{{ _("这是固定实验直接写入研究租户的") }}<strong>{{ _("模拟工具读取记录") }}</strong>{{ _("，用于验证记忆防护。它没有经过安全网关调用真实 MCP Server，因此这里没有网关决策、工具审计或 Judge 结果。") }}</p></section>
+<section><p>{{ _("调用 ID") }} <code>{{ call.call_id }}</code> {{ _("· 会话") }} <code>{{ call.session_id }}</code> {{ _("· 工具") }} {{ call.tool }}</p>
+<h2>{{ _("固定参数") }}</h2><pre>{{ call.arguments | tojson(indent=2) }}</pre>
+{% if call.result and call.result.content %}<h2>{{ _("合成材料正文") }}</h2><pre>{{ call.result.content }}</pre>{% endif %}
+<h2>{{ _("完整合成结果") }}</h2><pre>{{ call.result | tojson(indent=2) }}</pre></section>
+{% endblock %}

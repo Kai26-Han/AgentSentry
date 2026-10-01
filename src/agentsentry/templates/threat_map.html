@@ -1,0 +1,20 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("威胁关联") }}{% endblock %}
+{% block title_text %}{{ _("威胁关联") }}{% endblock %}
+{% block content %}
+<h1>{{ _("威胁关联") }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 映射版本：") }}<code>{{ health.version }}</code> · OWASP Agentic Top 10 2026 · MITRE ATLAS {{ catalog.frameworks.atlas.release }}</p>
+<div class="notice">{{ _("这里显示已提交事件的分类线索。威胁编号和框架类别不证明攻击成功，也不改变网关、审批或 Judge 的决定。历史补映射会单独标记。") }}</div>
+<section><h2>{{ _("投影状态") }}</h2><p>{{ _("状态：") }}{{ ({'current':'已追上','pending':'处理中','not_started':'尚未开始','failed':'失败'}.get(health.status, health.status)) | ui }} {{ _("· 待处理事件：") }}{{ (health.pending if health.pending is not none else '尚未统计') | ui }} {{ _("· 本页时间范围内未映射事件：") }}{{ unmapped_count }}{% if health.last_error %} {{ _("· 最近错误：") }}<code>{{ health.last_error }}</code>{% endif %}</p>
+<p class="small">{{ _("未映射表示现有规则没有足够证据归入项目威胁；待处理表示映射任务尚未完成。两者不能解释为安全。") }}</p></section>
+<section class="view-panel" {% if shell_view != 'framework' %}hidden{% endif %}><h2>{{ _("项目威胁与框架映射") }}</h2><div class="table-wrap"><table><tr><th>{{ _("场景") }}</th><th>OWASP</th><th>MITRE ATLAS</th><th>{{ _("项目验证状态") }}</th><th>{{ _("近期事件") }}</th></tr>
+{% for threat in catalog.threats %}<tr><td><a href="/dashboard/threat-map/threats/{{ threat.id }}?days={{ days }}"><code>{{ threat.id }}</code> {{ (threat.title) | ui }}</a></td><td>{{ threat.owasp | join('、') }}</td><td>{{ (threat.atlas | join('、') if threat.atlas else '未对应技术') | ui }}</td><td>{{ (threat.status) | ui }}</td><td>{{ counts.get(threat.id, 0) }}</td></tr>{% endfor %}
+</table></div></section>
+<section class="view-panel" {% if shell_view == 'framework' %}hidden{% endif %}><h2>{{ _("事件证据") }}{% if selected_threat %} · {{ selected_threat }}{% endif %}</h2>
+<form method="get" action="/dashboard/threat-map"><label>{{ _("威胁") }} <select name="threat_id"><option value="">{{ _("全部") }}</option>{% for threat in catalog.threats %}<option value="{{ threat.id }}" {% if selected_threat == threat.id %}selected{% endif %}>{{ threat.id }} {{ (threat.title) | ui }}</option>{% endfor %}</select></label><label>{{ _("最近天数") }} <input name="days" type="number" min="1" max="3650" value="{{ days }}"></label><button>{{ _("筛选") }}</button></form>
+<p class="small">{{ _("匹配事件") }} {{ total_rows }} {{ _("条；下表显示最近 100 条。每行保留当时的映射版本，不按当前目录重判历史事件。") }}</p>
+<div class="table-wrap"><table><tr><th>{{ _("事件时间") }}</th><th>{{ _("场景与线索") }}</th><th>{{ _("处置") }}</th><th>{{ _("来源") }}</th><th>{{ _("证据") }}</th></tr>
+{% for row in rows %}<tr><td>{{ row.observed_at }}</td><td>{% for match in row.matches %}<code>{{ match.threat_id }}</code> {{ (match.threat_title) | ui }} · {{ (match.signal_title) | ui }}<br>{% endfor %}</td><td>{% for match in row.matches %}{{ (match.effect or '线索') | ui }}{% if not loop.last %}、{% endif %}{% endfor %}</td><td>{{ row.event_type }} · {{ ('历史补映射' if row.origin == 'historical_backfill' else '新事件') | ui }}</td><td><a href="/dashboard/threat-map/{{ row.id }}">{{ _("查看关联") }}</a></td></tr>
+{% else %}<tr><td colspan="5">{{ _("当前范围暂无可核实的映射事件。可查看投影状态，或通过固定安全实验产生合成证据。") }}</td></tr>{% endfor %}
+</table></div></section>
+{% endblock %}

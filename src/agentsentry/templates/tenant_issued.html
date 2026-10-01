@@ -1,0 +1,9 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("租户已创建") }}{% endblock %}
+{% block title_text %}{{ _("租户已创建") }}{% endblock %}
+{% block content %}
+<h1>{{ _("租户已创建") }}</h1><section><p>{{ _("名称：") }}{{ name }}</p><p>{{ _("租户 ID：") }}<code>{{ tenant_id }}</code></p>
+<p>{{ _("管理员密码：") }}<code>{{ admin_password }}</code></p><p>Agent API Key：<code>{{ agent_api_key }}</code></p></section>
+<p>{{ _("请现在保存凭据；离开后无法再次查看。Agent 调用需附上") }} <code>X-Tenant-ID: {{ tenant_id }}</code>。</p>
+<p><a href="/dashboard/tenants">{{ _("返回租户管理") }}</a></p>
+{% endblock %}

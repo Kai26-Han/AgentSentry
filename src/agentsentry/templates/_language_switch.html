@@ -1,0 +1,4 @@
+<nav class="language-switch" aria-label="{{ _('界面语言') }}">
+  <a href="{{ switch_language_url(request, 'zh') }}" lang="zh" hreflang="zh" {% if ui_language == 'zh' %}aria-current="true"{% endif %}>中文</a>
+  <a href="{{ switch_language_url(request, 'en') }}" lang="en" hreflang="en" {% if ui_language == 'en' %}aria-current="true"{% endif %}>English</a>
+</nav>

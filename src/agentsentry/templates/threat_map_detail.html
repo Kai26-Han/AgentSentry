@@ -1,0 +1,18 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("威胁映射证据") }}{% endblock %}
+{% block title_text %}{{ _("威胁映射证据") }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/threat-map">{{ _("← 返回威胁映射") }}</a></p>
+<h1>{{ _("威胁映射证据") }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 审计事件：") }}<code>{{ row.audit_event_id }}</code> {{ _("· 映射版本：") }}<code>{{ row.mapping_version }}</code></p>
+<section><p>{{ _("事件类型：") }}{{ row.event_type }} {{ _("· 原事件时间：") }}{{ row.observed_at }} · {{ ('历史补映射' if row.origin == 'historical_backfill' else '新事件') | ui }}。</p>
+{% if row.call_id %}<p>{{ _("工具调用：") }}{% if call_exists %}<a href="/dashboard/calls/{{ row.call_id }}"><code>{{ row.call_id }}</code></a>{% else %}<code>{{ row.call_id }}</code>{{ _("（原调用已不可用）") }}{% endif %}</p>{% endif %}
+{% if row.agent_id and row.session_id %}<p>{{ _("会话：") }}{% if session_exists %}<a href="/dashboard/runtime-sessions/detail?agent_id={{ row.agent_id | urlencode }}&session_id={{ row.session_id | urlencode }}"><code>{{ row.session_id }}</code></a>{% else %}<code>{{ row.session_id }}</code>{{ _("（会话详情不可用）") }}{% endif %}</p>{% endif %}
+{% if row.source_record_id %}<p>{{ _("原判定记录 ID：") }}<code>{{ row.source_record_id }}</code></p>{% endif %}
+<p>{{ _("关联状态：") }}{{ ('有明确规则命中' if row.status == 'matched' else '未映射') | ui }}{{ _("。只保留编号、处置和证据 ID，不复制任务或工具正文。") }}</p></section>
+{% for match in row.matches %}<section><h2><a href="/dashboard/threat-map/threats/{{ match.threat_id }}">{{ match.threat_id }} {{ (match.threat_title) | ui }}</a></h2><p>{{ _("触发规则：") }}<code>{{ match.signal_id }}</code> {{ (match.signal_title) | ui }} {{ _("· 原处置：") }}{{ (match.effect or '仅线索') | ui }}</p>
+<p>OWASP：{% for category in match.owasp %}<a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">{{ category }}</a>{% if not loop.last %}、{% endif %}{% endfor %}</p>
+<p>MITRE ATLAS：{% for technique in match.atlas %}<a href="{{ match.atlas_urls[technique] }}">{{ technique }}</a>{% if not loop.last %}、{% endif %}{% else %}{{ _("此场景没有强行对应技术") }}{% endfor %}</p>
+<p>{{ _("来源证据 ID：") }}{% for identifier in match.evidence_ids %}<code>{{ identifier }}</code>{% if not loop.last %}、{% endif %}{% else %}{{ _("见原判定记录") }}{% endfor %}</p>
+<p class="small">{{ match.interpretation }}{{ _("。请结合原调用状态、实际副作用和人工复核判断。") }}</p></section>{% else %}<section><p>{{ _("此事件没有满足当前映射规则的明确条件。") }}</p></section>{% endfor %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("租户管理") }}{% endblock %}
+{% block title_text %}{{ _("租户管理") }}{% endblock %}
+{% block content %}
+<h1>{{ _("租户管理") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<section><h2>{{ _("租户管理") }}</h2><p>{{ _("新租户拥有独立的工具数据、审计、告警、样本和策略文件。凭据只显示一次。") }}</p>
+<form method="post" action="/dashboard/tenants"><input type="hidden" name="csrf" value="{{ csrf }}"><label>{{ _("租户名称") }} <input name="name" maxlength="120" required></label><button>{{ _("创建租户") }}</button></form>
+<table><tr><th>{{ _("名称") }}</th><th>{{ _("租户 ID") }}</th><th>{{ _("状态") }}</th></tr>{% for tenant in tenant_rows %}<tr><td>{{ tenant.name }}</td><td><code>{{ tenant.id }}</code></td><td>{{ ('启用' if tenant.active else '停用') | ui }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

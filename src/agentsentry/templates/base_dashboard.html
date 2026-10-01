@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="{{ ui_language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AgentSentry{% endblock %} · AgentSentry</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#183142;background:#f3f7fa}
+    *{box-sizing:border-box}body{margin:0}a{color:#075d78}a:hover{text-decoration:underline}
+    .topbar{height:64px;background:#123346;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:16px}
+    .topbar a{color:#fff;text-decoration:none}.brand{font-size:20px;font-weight:700;letter-spacing:.02em}
+    .top-actions{display:flex;align-items:center;gap:16px;min-width:0}.top-actions .tenant{font-size:13px;color:#d4e8f1;overflow-wrap:anywhere}
+    .language-switch{display:flex;gap:4px;white-space:nowrap}.language-switch a{padding:5px 8px;border:1px solid #8eacb9;border-radius:5px;font-size:13px}.language-switch a[aria-current=true]{background:#d3e9f3;color:#123346}.top-actions form{margin:0}.top-actions button{background:transparent;border:1px solid #8eacb9;color:#fff}
+    .shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:calc(100vh - 64px)}
+    .sidebar{background:#eaf1f5;border-right:1px solid #d5e1e8;padding:20px 12px;position:sticky;top:0;height:calc(100vh - 64px);overflow:auto}
+    .nav-item,.nav-group{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:8px;text-decoration:none;color:#254658;font-size:14px;line-height:1.35;font-weight:600}
+    .nav-item:hover{background:#dceaf0;text-decoration:none}.nav-item.active{background:#d3e9f3;color:#064e67;font-weight:600}
+    .nav-child{padding-left:28px;font-weight:400}.nav-group{cursor:pointer;list-style:none;font-weight:600}.nav-group::-webkit-details-marker{display:none}.nav-group::after{content:'›';transition:transform .15s}.nav-section[open]>.nav-group::after{transform:rotate(90deg)}.nav-section{margin-top:8px}
+    .workspace-tabs,.detail-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #d5e1e8;margin:12px 0 20px;padding-bottom:6px}.workspace-tabs a,.detail-tabs a{padding:9px 14px;text-decoration:none;border-radius:6px;color:#496370;font-size:14px}.workspace-tabs a.active,.detail-tabs a.active{background:#d3e9f3;color:#064e67;font-weight:600}.workspace-tabs a:hover,.detail-tabs a:hover{background:#e4eef3}.view-panel[hidden]{display:none}
+    .badge{border-radius:99px;padding:2px 7px;background:#f5d8d2;color:#8d3027;font-size:12px;min-width:23px;text-align:center}
+    main{min-width:0;max-width:1480px;width:100%;padding:26px 32px 48px;margin:0 auto}
+    .crumb{color:#607987;font-size:13px;margin-bottom:8px}.crumb a{color:inherit}h1{margin:0 0 8px;font-size:25px}h2{margin:0 0 14px;font-size:18px}h3{font-size:15px}
+    .page-meta{color:#5f7480;margin:0 0 20px}.page-meta code{font-size:12px}
+    section,.panel{background:#fff;border:1px solid #d9e4eb;border-radius:10px;padding:18px;margin:16px 0;box-shadow:0 1px 2px #1433460a;overflow-x:auto}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.grid section{margin:0}
+    .metric{font-size:27px;font-weight:700;margin:4px 0}.muted,.small{color:#617784;font-size:12px}.danger{color:#a22f29}
+    .judge-score{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}.judge-signal{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:99px;background:#eaf1f5;color:#465f6d;font-size:12px;white-space:nowrap}.judge-signal-hit{background:#fae7dc;color:#893e17}
+    .table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:550px}th,td{border-bottom:1px solid #e5edf1;padding:10px;text-align:left;vertical-align:top}th{color:#4f6875;font-weight:600;background:#f8fbfc;white-space:nowrap}tr:last-child td{border-bottom:0}
+    .threat-facts{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr);margin:0}.threat-facts dt,.threat-facts dd{margin:0;padding:10px 4px;border-bottom:1px solid #e5edf1}.threat-facts dt{font-weight:600;color:#4f6875}.threat-facts dd{overflow-wrap:anywhere}
+    .rules-table{min-width:1190px}.rules-table th[scope=row]{min-width:160px;background:#fff;color:#183142}.rules-table th:nth-child(2),.rules-table td:nth-child(2),.rules-table th:nth-child(6),.rules-table td:nth-child(6){min-width:90px;white-space:nowrap}.rules-table .rule-scope{min-width:160px}.rules-table .rule-trigger{min-width:300px}.rules-table .rule-effect{min-width:170px}.rules-table .rule-details{min-width:120px}.rules-table details summary{cursor:pointer;color:#075d78}.rules-table details p{min-width:220px;margin:9px 0}.rules-table pre{max-width:360px}
+    code,pre{overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#f3f7fa;padding:14px;border-radius:6px;overflow:auto}
+    input,select,textarea,button{font:inherit;padding:7px 9px;margin:3px}input,select,textarea{border:1px solid #bfd0da;border-radius:5px;max-width:100%}
+    button{background:#12617b;color:#fff;border:0;border-radius:5px;cursor:pointer}button:hover{background:#0c4e64}button:focus-visible,a:focus-visible{outline:3px solid #efb948;outline-offset:2px}
+    form{max-width:100%}.notice{border-left:4px solid #267998;background:#eaf5f8;padding:12px 16px;margin:14px 0}
+    .mobile-menu{display:none}.topbar .status-link{font-size:13px;color:#cde7ef}
+    @media(max-width:760px){.topbar{height:auto;min-height:60px;padding:10px 14px;flex-wrap:wrap}.mobile-menu{display:inline-block}.shell{display:block}.sidebar{display:none;position:static;height:auto;border-right:0;border-bottom:1px solid #d5e1e8}.sidebar.open{display:block}main{padding:18px 14px}.top-actions{gap:8px}.top-actions .tenant{max-width:150px}.threat-facts{grid-template-columns:1fr}.threat-facts dt{border-bottom:0;padding-bottom:0}.threat-facts dd{padding-top:3px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div><button class="mobile-menu" type="button" aria-label="{{ _("展开目录") }}" aria-controls="main-nav" aria-expanded="false" onclick="const n=document.getElementById('main-nav');const open=n.classList.toggle('open');this.setAttribute('aria-expanded',String(open))">☰</button> <a class="brand" href="/dashboard">AgentSentry</a></div>
+    <div class="top-actions">{% include "_language_switch.html" %}<span class="tenant">{{ _("登录租户：") }}<code>{{ shell_tenant_id }}</code></span><a class="status-link" href="/dashboard/system">{{ _("运行状态") }}</a><form method="post" action="/logout"><input type="hidden" name="csrf" value="{{ shell_csrf }}"><button>{{ _("退出") }}</button></form></div>
+  </header>
+  <div class="shell">
+    <aside id="main-nav" class="sidebar"><nav aria-label="{{ _("主目录") }}">
+      <a class="nav-item {{ 'active' if shell_active == 'overview' else '' }}" href="/dashboard" {% if shell_active == 'overview' %}aria-current="page"{% endif %}>{{ _("总览") }}</a>
+      <a class="nav-item {{ 'active' if shell_active == 'alerts' else '' }}" href="/dashboard/alerts" {% if shell_active == 'alerts' %}aria-current="page"{% endif %}>{{ _("告警") }} {% if shell_open_alerts %}<span class="badge">{{ shell_open_alerts }}</span>{% endif %}</a>
+      <a class="nav-item {{ 'active' if shell_active == 'approvals' else '' }}" href="/dashboard/approvals" {% if shell_active == 'approvals' %}aria-current="page"{% endif %}>{{ _("审批") }} {% if shell_pending_approvals %}<span class="badge">{{ shell_pending_approvals }}</span>{% endif %}</a>
+      {% for group in shell_groups %}
+      <details class="nav-section" data-nav-group="{{ (group.label) | ui }}" {% if group.active or (shell_active == 'overview' and loop.first) %}open{% endif %}>
+        <summary class="nav-group">{{ (group.label) | ui }}</summary>
+        {% for item in group['items'] %}<a class="nav-item nav-child {{ 'active' if item.active else '' }}" href="{{ item.url }}" {% if item.active %}aria-current="page"{% endif %}>{{ (item.label) | ui }}</a>{% endfor %}
+      </details>
+      {% endfor %}
+    </nav></aside>
+    <main id="main-content"><div class="crumb"><a href="/dashboard">{{ _("总览") }}</a>{% if shell_group %} / {{ (shell_group) | ui }} / <a href="{{ shell_workspace_url }}{% if shell_workspace_key in ['sessions','memory-labs','attack-labs'] and tenant_id is defined %}?tenant={{ tenant_id | urlencode }}{% endif %}">{{ (shell_workspace) | ui }}</a>{% endif %} / {% if shell_tabs %}{% for tab in shell_tabs %}{% if tab.active %}{{ (tab.label) | ui }}{% endif %}{% endfor %}{% else %}{% block breadcrumb %}{% block title_text %}{{ _("当前页面") }}{% endblock %}{% endblock %}{% endif %}</div>
+      {% if shell_tabs %}<nav class="workspace-tabs" aria-label="{{ (shell_workspace) | ui }}{{ _("视图") }}">{% for tab in shell_tabs %}<a href="{{ tab.url }}{% if shell_workspace_key in ['sessions','memory-labs','attack-labs'] and tenant_id is defined and not request.query_params.get('tenant') %}{{ '&' if '?' in tab.url else '?' }}tenant={{ tenant_id | urlencode }}{% endif %}" class="{{ 'active' if tab.active else '' }}" {% if tab.active %}aria-current="true"{% endif %}>{{ (tab.label) | ui }}</a>{% endfor %}</nav>{% endif %}
+      {% if observer is defined and observer and tenant_id is defined %}<div class="notice">{{ _("当前查看的数据租户：") }}<code>{{ tenant_id }}</code>{{ _("。登录租户仍为") }} <code>{{ shell_tenant_id }}</code>{{ _("；此页仅按研究租户读取证据。") }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+<script>
+    document.querySelectorAll('.nav-section').forEach(section=>{
+      const key='agentsentry-nav-'+section.dataset.navGroup;
+      try{const saved=sessionStorage.getItem(key);if(saved!==null&&!section.querySelector('.nav-item.active'))section.open=saved==='open'}catch(e){}
+      section.addEventListener('toggle',()=>{try{sessionStorage.setItem(key,section.open?'open':'closed')}catch(e){}});
+    });
+  </script>
+</body>
+</html>

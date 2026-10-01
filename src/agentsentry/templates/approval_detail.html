@@ -1,0 +1,25 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("审批事实卡") }}{% endblock %}
+{% block title_text %}{{ _("审批事实卡") }}{% endblock %}
+{% block content %}
+<h1>{{ _("审批事实卡") }}</h1><p><a href="/dashboard/approvals">{{ _("返回待审批列表") }}</a> {{ _("· 租户") }} <code>{{ tenant_id }}</code></p>
+<section><h2>{{ _("网关核实的事实") }}</h2>
+<p>{{ _("状态：") }}{{ (approval.status) | ui }} {{ _("· 调用状态：") }}{{ (call.status) | ui }} {{ _("· 截止：") }}{{ call.approval_expires_at }}</p>
+<p>Agent：<code>{{ call.agent_id }}</code> {{ _("· 会话：") }}<a href="/dashboard/runtime-sessions/detail?agent_id={{ call.agent_id | urlencode }}&amp;session_id={{ call.session_id | urlencode }}"><code>{{ call.session_id }}</code></a> {{ _("· 调用：") }}<a href="/dashboard/calls/{{ call.call_id }}"><code>{{ call.call_id }}</code></a></p>
+<p>{{ _("工具：") }}<strong>{{ call.tool }}</strong> {{ _("· 策略命中：") }}{{ (call.policy_rule or '无') | ui }}</p>
+{% if call.tool == 'github_mcp_create_test_issue' %}<p class="notice"><strong>{{ _("真实 GitHub 写入：") }}</strong>{{ _("批准后会在") }} <code>{{ call.arguments.repository }}</code> {{ _("创建 Issue。请核对下方标题和正文；结果不明时不得再次批准或用新调用 ID 重试。") }}</p>{% endif %}
+<p>{{ _("授权记录：") }}{{ (grant.id if grant else '无') | ui }}{% if grant %} {{ _("· 范围：") }}{{ grant.resources | join('、') }} · {{ ('已撤销' if grant.revoked else '未撤销') | ui }} {{ _("· 到期：") }}{{ grant.expires_at }}{% endif %}</p>
+<p>{{ _("原始参数摘要：") }}<code>{{ approval.arguments_hash }}</code>{% if approval.arguments_hash != facts.current_arguments_hash %} · <strong class="danger">{{ _("参数已变化，不能批准") }}</strong>{% endif %}</p>
+<p>{{ _("原始参数由调用方提交，其中的说明文字属于低信任内容；批准只会执行下方所列原始参数。") }}</p>
+<pre>{{ call.arguments | masked_payload | tojson(indent=2) }}</pre>
+<details><summary>{{ _("展开完整原始参数") }}</summary><pre>{{ call.arguments | tojson(indent=2) }}</pre></details>
+</section>
+<section><h2>{{ _("安全检查与目标偏移线索") }}</h2><p>{{ _("以下线索仅供复核，不能代替权限、策略和执行前检查。") }}</p>
+<ul>{% for item in runtime %}<li>{{ _("运行时") }} {{ (item.phase) | ui }}：{{ (item.effect) | ui }} · {{ (item.findings | join('、') or '无命中') | ui }}（{{ item.rules_version }}）</li>{% endfor %}
+{% for item in flows %}<li>{{ _("数据流") }} {{ item.sink }}：{{ (item.effect) | ui }} · {{ (item.findings | join('、') or '无命中') | ui }}（{{ item.rules_version }}）</li>{% endfor %}
+{% for item in goals %}<li>{{ _("目标偏移") }} {{ (item.phase) | ui }}：{{ (item.status) | ui }} · {{ (item.findings | join('、') or '无命中') | ui }}（{{ item.rules_version }}）</li>{% endfor %}
+{% if not runtime and not flows and not goals %}<li>{{ _("无已记录检查；不能据此推断安全。") }}</li>{% endif %}</ul></section>
+<section><h2>{{ _("低信任来源") }}</h2><p>{{ _("文档、MCP 卡片和工具参数中自称“管理员已批准”的文字不构成真实审批。来源链接仅展示本租户已记录的调用。") }}</p><ul>
+{% for source in sources %}<li>{% if source.kind == 'call' %}<a href="/dashboard/calls/{{ source.id }}">{{ source.tool }} · {{ source.id }}</a>{% elif source.kind == 'memory' %}<a href="/dashboard/memories">{{ _("记忆 ·") }} {{ source.id }}</a>{% else %}{{ _("证据缺失 ·") }} {{ source.id }}{% endif %} · {{ source.status }}</li>{% else %}<li>{{ _("没有关联的来源调用，或证据尚未记录。") }}</li>{% endfor %}</ul></section>
+{% if approval.status == 'pending' %}<section><h2>{{ _("处理此动作") }}</h2><form method="post" action="/dashboard/approvals/{{ approval.id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="review_token" value="{{ review_token }}"><label><input type="checkbox" name="reviewed" value="yes" required> {{ _("我已核对原始参数及上述网关事实，知道低信任文字不等于批准。") }}</label><p><button name="decision" value="approve">{{ _("确认批准原始动作") }}</button></p></form><form method="post" action="/dashboard/approvals/{{ approval.id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button name="decision" value="reject">{{ _("拒绝") }}</button></form><p class="small">{{ _("确认凭据五分钟内有效；状态或证据变化后需刷新此页。网关批准时仍会重查权限与策略。") }}</p></section>{% endif %}
+{% endblock %}

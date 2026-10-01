@@ -1,0 +1,9 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("工具调用与审计") }}{% endblock %}
+{% block title_text %}{{ _("工具调用") }}{% endblock %}
+{% block content %}
+<h1>{{ _("工具调用与审计 · 工具调用") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<section><h2>{{ _("工具调用") }}</h2><table><tr><th>{{ _("时间") }}</th><th>{{ _("调用") }}</th><th>{{ _("工具") }}</th><th>{{ _("决策") }}</th><th>{{ _("状态") }}</th><th>{{ _("规则 / 原因") }}</th></tr>
+{% for call in calls %}<tr><td>{{ call.created_at }}</td><td><a href="/dashboard/calls/{{ call.call_id }}"><code>{{ call.call_id }}</code></a></td><td>{{ call.tool }}</td><td>{{ call.decision }}</td><td>{{ (call.status) | ui }}</td><td>{{ call.policy_rule }} {{ call.reason or '' }}</td></tr>
+{% else %}<tr><td colspan="6">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

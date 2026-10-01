@@ -1,0 +1,8 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("工具调用授权已签发") }}{% endblock %}
+{% block title_text %}{{ _("工具调用授权已签发") }}{% endblock %}
+{% block content %}
+<h1>{{ _("工具调用授权已签发") }}</h1><p>{{ _("授权令牌只显示这一次。请放入可信示例 Agent 的运行环境，不要放进模型提示词。") }}</p>
+<p>{{ _("租户：") }}{{ tenant_id }}；Grant ID: {{ grant.id }}{{ _("；工具：") }}{{ grant.tool }}{{ _("；有效期至：") }}{{ grant.expires_at }}</p>
+<pre><code>{{ token }}</code></pre><p><a href="/dashboard/grants">{{ _("返回工具调用授权") }}</a></p>
+{% endblock %}

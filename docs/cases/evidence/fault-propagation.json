@@ -1,0 +1,296 @@
+{
+  "sample_version": "fault-lab-v1",
+  "sample_sha256": "0685e5f7a49f4197b0aa3b8f3281bbf953faecba00408ea91395a931508882b9",
+  "environment": "隔离临时 SQLite 与受控替身",
+  "passed": 22,
+  "total": 22,
+  "results": [
+    {
+      "id": "F01",
+      "name": "权限存储不可用时不执行工具",
+      "passed": true,
+      "evidence": {
+        "HTTP状态": 503,
+        "工具执行次数": 0,
+        "敏感错误未展示": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F02",
+      "name": "安全决定提交失败时不执行工具",
+      "passed": true,
+      "evidence": {
+        "HTTP状态": 503,
+        "工具执行次数": 0,
+        "敏感错误未展示": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F03",
+      "name": "可能已执行的写入结果不明且不自动重试",
+      "passed": true,
+      "evidence": {
+        "最终状态": "unknown",
+        "重复请求额外执行": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F04",
+      "name": "连续三次失败后熔断",
+      "passed": true,
+      "evidence": {
+        "首次拒绝": "dependency_circuit_open",
+        "后续行为": "open",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F05",
+      "name": "冷却后成功探测恢复",
+      "passed": true,
+      "evidence": {
+        "首次拒绝": "dependency_circuit_open",
+        "后续行为": "recover",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F06",
+      "name": "冷却后只放行一个探测",
+      "passed": true,
+      "evidence": {
+        "首次拒绝": "dependency_circuit_open",
+        "后续行为": "single_probe",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F07",
+      "name": "每个依赖最多两个执行租约",
+      "passed": true,
+      "evidence": {
+        "并发上限": 2,
+        "结果": "concurrency",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F08",
+      "name": "执行租约过期不永久占用并发槽",
+      "passed": true,
+      "evidence": {
+        "并发上限": 2,
+        "结果": "expire",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F09",
+      "name": "一个依赖熔断不影响其他依赖",
+      "passed": true,
+      "evidence": {
+        "首次拒绝": "dependency_circuit_open",
+        "后续行为": "dependency_isolation",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F10",
+      "name": "Broker 故障后批内停止发送并保留事件",
+      "passed": true,
+      "evidence": {
+        "故障时连接尝试": 1,
+        "事件保留数": 2,
+        "实际分析次数": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F11",
+      "name": "退避期限内不重新投递",
+      "passed": true,
+      "evidence": {
+        "故障时连接尝试": 1,
+        "事件保留数": 2,
+        "实际分析次数": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F12",
+      "name": "重复任务只生成一条 Judge 结果",
+      "passed": true,
+      "evidence": {
+        "最终状态": "completed",
+        "实际尝试": 1,
+        "错误原文未保存": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F13",
+      "name": "迟到 Worker 不能覆盖新处理代次",
+      "passed": true,
+      "evidence": {
+        "旧代次不能写入": true,
+        "工具重放次数": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F14",
+      "name": "管理员仅能重试终止的异步任务",
+      "passed": true,
+      "evidence": {
+        "旧代次不能写入": true,
+        "工具重放次数": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F15",
+      "name": "单租户投递异常仍继续其他租户和阶段",
+      "passed": true,
+      "evidence": {
+        "完成阶段": [
+          [
+            "broken",
+            "judge"
+          ],
+          [
+            "broken",
+            "webhook"
+          ],
+          [
+            "healthy",
+            "judge"
+          ],
+          [
+            "healthy",
+            "webhook"
+          ]
+        ],
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F16",
+      "name": "Judge 最多实际失败三次且错误不留原文",
+      "passed": true,
+      "evidence": {
+        "最终状态": "failed",
+        "实际尝试": 3,
+        "错误原文未保存": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F17",
+      "name": "执行进程中断后标为 unknown",
+      "passed": true,
+      "evidence": {
+        "最终状态": "unknown",
+        "重复请求额外执行": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "F18",
+      "name": "半开失败重新冷却",
+      "passed": true,
+      "evidence": {
+        "首次拒绝": "dependency_circuit_open",
+        "后续行为": "probe_failure",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "故障验证"
+    },
+    {
+      "id": "N01",
+      "name": "正常依赖请求完成",
+      "passed": true,
+      "evidence": {
+        "并发上限": 2,
+        "结果": "normal_dependency",
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "正常对照"
+    },
+    {
+      "id": "N02",
+      "name": "远程故障时正常本地读取仍可完成",
+      "passed": true,
+      "evidence": {
+        "HTTP状态": 200,
+        "工具执行次数": 1,
+        "敏感错误未展示": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "正常对照"
+    },
+    {
+      "id": "N03",
+      "name": "Judge 停机时同步调用保留审计并完成",
+      "passed": true,
+      "evidence": {
+        "HTTP状态": 200,
+        "工具执行次数": 1,
+        "敏感错误未展示": true,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "正常对照"
+    },
+    {
+      "id": "N04",
+      "name": "Broker 恢复后原事件可投递",
+      "passed": true,
+      "evidence": {
+        "故障时连接尝试": 1,
+        "事件保留数": 2,
+        "实际分析次数": 0,
+        "已提交执行记录审计缺失": 0
+      },
+      "kind": "正常对照"
+    }
+  ],
+  "verification_date": "2026-09-30",
+  "postgres_verification": {
+    "four_concurrent_leases": 2,
+    "four_concurrent_half_open_probes": 1,
+    "duplicate_analysis_results": 1,
+    "temporary_schema_removed": true
+  },
+  "redis_worker_verification": {
+    "broker_failure_seconds": 2.12,
+    "results_before_worker": 0,
+    "results_after_worker": 1,
+    "audit_missing": 0,
+    "daily_services_stopped": false
+  },
+  "regression_tests_passed": 203,
+  "public_export": {
+    "说明": "公开案例验证摘要；不分发凭据、个人学习记录、研究租户与会话标识或原始运行轨迹。",
+    "重新验证": false,
+    "原始证据": "仅保存在原作者本机，未随此副本分发；请运行提供的实验和测试自行复现。"
+  }
+}

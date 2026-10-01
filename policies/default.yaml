@@ -1,0 +1,36 @@
+version: 1
+default: deny
+rules:
+  - id: prohibit_secret_marker
+    effect: deny
+    tool: send_external
+    argument_regex:
+      field: content
+      pattern: '(?i)(api[_-]?key|password|secret)\s*[:=]'
+  - id: public_or_scoped_read
+    effect: allow
+    tool: read_document
+  - id: create_task
+    effect: allow
+    tool: create_task
+  - id: delete_needs_review
+    effect: require_approval
+    tool: delete_task
+  - id: external_needs_review
+    effect: require_approval
+    tool: send_external
+  - id: shell_needs_review
+    effect: require_approval
+    tool: run_shell
+  - id: mcp_card_read
+    effect: allow
+    tool: mcp_lookup_card
+  - id: mcp_note_needs_review
+    effect: require_approval
+    tool: mcp_record_note
+  - id: remote_mcp_card_read
+    effect: allow
+    tool: remote_mcp_lookup_card
+  - id: remote_mcp_note_needs_review
+    effect: require_approval
+    tool: remote_mcp_record_note

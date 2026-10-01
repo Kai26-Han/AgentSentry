@@ -1,0 +1,40 @@
+# 本机配置与凭据；只提交空白配置示例。
+.env
+.env.*
+!.env.example
+.local/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# 租户策略与运行数据由本机服务生成。
+policies/t_*.yaml
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.log
+eval-report.json
+
+# 依赖、编译产物、测试缓存与个人编辑器配置。
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+junit*.xml
+build/
+dist/
+*.egg-info/
+.DS_Store
+.idea/
+.vscode/

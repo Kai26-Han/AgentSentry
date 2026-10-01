@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% from "_judge_score.html" import score as judge_score with context %}
+{% block title %}{{ _("调用详情") }}{% endblock %}
+{% block title_text %}{{ _("调用详情") }}{% endblock %}
+{% block content %}
+<p><a href="{{ back_url or '/dashboard/activity' }}">{{ _("← 返回工具调用") }}</a></p><h1>{{ _("调用") }} {{ call.call_id }}</h1>
+<section><p>{{ _("会话：") }}{{ call.session_id }} · Agent：{{ call.agent_id }} {{ _("· 工具：") }}{{ call.tool }}</p>
+<p>{{ _("状态：") }}{{ (call.status) | ui }} {{ _("· 决策：") }}{{ call.decision }} {{ _("· 规则：") }}{{ call.policy_rule }}</p>
+<h2>{{ _("固定参数") }}</h2><pre>{{ call.arguments | masked_payload | tojson(indent=2) }}</pre><h2>{{ _("结果") }}</h2><pre>{{ call.result | masked_payload | tojson(indent=2) }}</pre><p class="small">{{ _("敏感正文默认遮盖；V2.8 前的历史调用可能曾以原文保存。") }}</p></section>
+<section><h2>{{ _("审计事件") }}</h2>{% for event in events %}{% set evidence = event_evidence[event.id] %}<h3>{{ event.event_type }} · {{ event.created_at }}</h3><p>{{ _("指定 Judge：") }}{{ evidence.designated }} {{ _("· 处理状态：") }}{{ (evidence.status) | ui }}</p><pre>{{ event.payload | masked_payload | tojson(indent=2) }}</pre>{% else %}<p>{{ _("暂无") }}</p>{% endfor %}</section>
+<section><h2>{{ _("Judge 结果") }}</h2><p class="small">{{ _("分数表示此审计事件的风险信号（0–1），不是攻击成功概率。标签不为 none 且分数达到当前阈值") }} {{ judge_threshold() }}{{ _("，才满足日常告警判定条件；工具是否执行请查看本页调用结果。") }}</p>{% for result in judges %}<p>{{ result.created_at }} · {{ result.provider }} / {{ result.model_version }} · {{ result.labels | join(', ') }} · {{ judge_score(result.score, result.labels) }}</p>{% else %}<p>{{ _("暂无") }}</p>{% endfor %}</section>
+{% if threat_rows is defined %}<section><h2>{{ _("威胁与框架映射") }}</h2><p class="small">{{ _("分类线索来自已提交的审计元数据；不能单独证明攻击成功。") }}</p>{% for row in threat_rows %}<p>{% for match in row.matches %}<a href="/dashboard/threat-map/{{ row.id }}"><code>{{ match.threat_id }}</code> {{ (match.threat_title) | ui }}</a> · {{ (match.signal_title) | ui }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% else %}<p>{{ _("暂无可核实的威胁映射；若事件刚发生，投影可能仍在处理。") }}</p>{% endfor %}</section>{% endif %}
+{% endblock %}

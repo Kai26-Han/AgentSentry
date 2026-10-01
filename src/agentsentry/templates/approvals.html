@@ -1,0 +1,11 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("审批") }}{% endblock %}
+{% block title_text %}{{ _("审批") }}{% endblock %}
+{% block content %}
+<h1>{{ _("审批") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code>{{ _("。批准前请进入详情，核对网关事实与原始参数。") }}</p>
+<section><h2>{{ _("待审批") }}</h2><table><tr><th>{{ _("调用") }}</th><th>{{ _("动作") }}</th><th>{{ _("截止") }}</th><th>{{ _("处理") }}</th></tr>
+{% for approval in approvals %}{% set call = approval_calls[approval.id] %}
+<tr><td><a href="/dashboard/calls/{{ call.call_id }}"><code>{{ call.call_id }}</code></a></td><td>{{ call.tool }} · {{ call.session_id }}</td><td>{{ call.approval_expires_at }}</td>
+<td><a href="/dashboard/approvals/{{ approval.id }}">{{ _("查看事实卡并处理") }}</a> <form method="post" action="/dashboard/approvals/{{ approval.id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button name="decision" value="reject">{{ _("拒绝") }}</button></form></td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

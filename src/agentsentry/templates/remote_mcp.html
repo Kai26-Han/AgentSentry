@@ -1,0 +1,45 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("远程 MCP 接入") }}{% endblock %}
+{% block title_text %}{{ _("远程 MCP 接入") }}{% endblock %}
+{% block content %}
+<h1>{{ _("远程 MCP 接入") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<p class="notice">{{ _("打开页面只读取工具清单；点击“重新观察”会额外调用受控合成服务的只读探针。远程 Server 的描述与新增工具不会直接展示给 Agent。此页不会显示 OAuth 凭据。") }}</p>
+{% if mcp_notice %}<p class="notice">{{ _("检查或审核结果：") }}<code>{{ mcp_notice }}</code></p>{% endif %}
+<section><h2>{{ _("接入状态") }}</h2>
+<table><tr><th>{{ _("端点") }}</th><th>{{ _("传输") }}</th><th>{{ _("状态") }}</th><th>{{ _("地址") }}</th><th>{{ _("协议版本") }}</th></tr>
+<tr><td>{{ health.endpoint_id }}</td><td>{{ health.protocol }}</td><td>{{ health.status }}</td><td>{{ (health.url or '未登记') | ui }}</td><td>{{ health.protocol_version or '—' }}</td></tr></table>
+{% if health.approved_manifest_sha256 %}<p>{{ _("已批准工具清单摘要：") }}<code>{{ health.approved_manifest_sha256 }}</code></p>{% endif %}
+{% if health.observed_manifest_sha256 %}<p>{{ _("当前工具清单摘要：") }}<code>{{ health.observed_manifest_sha256 }}</code>{{ _("；工具数量：") }}{{ health.tool_count }}</p>{% endif %}
+{% if health.expected_canary_sha256 %}<p>{{ _("合成只读探针：预期") }} <code>{{ health.expected_canary_sha256 }}</code>；{% if health.canary_checked %}{{ _("观察") }} <code>{{ (health.observed_canary_sha256 or '未取得') | ui }}</code>{% else %}{{ _("本次页面读取未运行；可点击下方按钮检查") }}{% endif %}</p>{% endif %}
+<p>{{ _("已批准档案修订：") }}{{ (health.profile_revision or '尚未建立') | ui }}{% if health.registration_changed %}；<strong class="danger">{{ _("接入身份配置已变化，调用已停止") }}</strong>{% endif %}</p>
+<form method="post" action="/dashboard/remote-mcp/scan"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit">{{ _("重新观察工具清单并记录变化") }}</button></form>
+<p class="small">{{ _("状态为 drift 时停止调用并人工检查工具定义；unavailable_or_auth_failed 表示身份、TLS、网络或服务故障，均按失败关闭。结果不明的写入不会自动重试。") }}</p></section>
+<section><h2>{{ _("接入档案与审核") }}</h2>
+<p class="small">{{ _("初始修订来自已登记配置；以后只允许管理员审核完整的固定工具定义。审核通过仍会在每次调用前重新核对实际清单。工具内容和注解均来自低信任上游，不作为授权依据。") }}</p>
+<div class="table-wrap"><table><tr><th>{{ _("发现时间") }}</th><th>{{ _("状态") }}</th><th>{{ _("端点身份摘要") }}</th><th>{{ _("工具清单摘要") }}</th><th>{{ _("观察到的定义") }}</th><th>{{ _("处理") }}</th></tr>
+{% for change in changes %}<tr><td>{{ change.created_at }}</td><td>{{ (change.status) | ui }}</td><td><code>{{ change.config_hash }}</code></td><td><code>{{ change.manifest_sha256 }}</code></td>
+<td><details><summary>{{ _("查看固定端点与工具差异") }}</summary>
+<p>{{ _("端点身份变化字段：") }}{{ (change_summaries[change.id].changed_facts | join('、') or '无') | ui }}</p>
+{% if change_summaries[change.id].old_definition_available %}<p>{{ _("新增工具：") }}{{ (change_summaries[change.id].added_tools | join('、') or '无') | ui }}{{ _("；删除工具：") }}{{ (change_summaries[change.id].removed_tools | join('、') or '无') | ui }}{{ _("；定义变化：") }}{{ (change_summaries[change.id].changed_tools | join('、') or '无') | ui }}</p>{% else %}<p>{{ _("初始修订没有保存旧定义全文，只能核对旧摘要和下方观察内容。") }}</p>{% endif %}
+<p>{{ _("观察到的端点身份：") }}<code>{{ change.config_facts | tojson }}</code></p><pre>{{ change.manifest | tojson(indent=2) }}</pre></details></td>
+<td>{% if change.status == 'pending' %}<form method="post" action="/dashboard/remote-mcp/changes/{{ change.id }}/decision"><input type="hidden" name="csrf" value="{{ csrf }}">{% if change_summaries[change.id].approvable %}<button type="submit" name="decision" value="approve">{{ _("批准当前观察") }}</button>{% else %}<span class="danger">{{ _("含未登记工具或参数变化，不能在线批准") }}</span>{% endif %}<button type="submit" name="decision" value="reject">{{ _("拒绝") }}</button></form>{% else %}—{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">{{ _("暂无接入变化记录") }}</td></tr>{% endfor %}</table></div>
+<p class="small">{{ _("新增工具或参数结构变化无法仅通过此页面批准，须先修改固定登记代码并完成安全测试。观察记录 10 分钟后失效，过期须重新扫描。") }}</p>
+<h3>{{ _("已批准修订") }}</h3><div class="table-wrap"><table><tr><th>{{ _("修订") }}</th><th>{{ _("状态") }}</th><th>{{ _("批准来源") }}</th><th>{{ _("批准时间") }}</th><th>{{ _("端点身份摘要") }}</th><th>{{ _("清单摘要") }}</th><th>{{ _("操作") }}</th></tr>
+{% for profile in profiles %}<tr><td>{{ profile.revision }}</td><td>{{ ('当前' if profile.active else '历史') | ui }}</td><td>{{ profile.approved_by }}</td><td>{{ profile.approved_at }}</td><td><code>{{ profile.config_hash }}</code></td><td><code>{{ profile.manifest_sha256 }}</code></td><td>{% if not profile.active %}<form method="post" action="/dashboard/remote-mcp/versions/{{ profile.revision }}/rollback"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit">{{ _("回退到此修订") }}</button></form>{% else %}—{% endif %}</td></tr>
+{% else %}<tr><td colspan="7">{{ _("未登记远程 MCP 档案") }}</td></tr>{% endfor %}</table></div></section>
+<section><h2>{{ _("供应链异常证据") }}</h2><div class="table-wrap"><table><tr><th>{{ _("时间") }}</th><th>{{ _("类别") }}</th><th>{{ _("预期摘要") }}</th><th>{{ _("观察摘要") }}</th><th>{{ _("调用证据") }}</th></tr>
+{% for incident in incidents %}<tr><td>{{ incident.created_at }}</td><td>{{ incident.kind }}</td><td><code>{{ incident.expected_sha256 or '—' }}</code></td><td><code>{{ (incident.observed_sha256 or '未取得') | ui }}</code></td><td>{% if incident.call_id %}<a href="/dashboard/calls/{{ incident.call_id }}">{{ incident.call_id }}</a>{% else %}{{ _("管理员扫描") }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="5">{{ _("暂无供应链异常") }}</td></tr>{% endfor %}</table></div></section>
+<section><h2>{{ _("GitHub 官方 MCP 只读测试") }}</h2>
+<p>{{ _("状态：") }}{{ ('已启用' if github_readonly.enabled else '未启用') | ui }}{{ _("；固定目标：") }}<code>github/github-mcp-server:LICENSE</code>{{ _("；端点：") }}<code>{{ github_readonly.endpoint }}</code></p>
+<p class="small">{{ _("许可证仅映射已审核的") }} <code>get_file_contents</code>{{ _("，工具定义摘要：") }}<code>{{ github_readonly.schema_sha256 }}</code>。</p>
+<p>{{ _("公开 Issue 只读目标：") }}<code>modelcontextprotocol/modelcontextprotocol#3213</code>{{ _("；端点：") }}<code>{{ github_readonly.issue_endpoint }}</code>。</p>
+<p class="small">{{ _("Issue 仅映射已审核的") }} <code>issue_read:get</code>{{ _("，工具定义摘要：") }}<code>{{ github_readonly.issue_schema_sha256 }}</code>{{ _("。公开内容仍按低信任、私有级别处理；此处不显示 PAT。实际调用请查看下方证据。") }}</p></section>
+<section><h2>{{ _("GitHub 测试仓库受控写入") }}</h2>
+<p>{{ _("状态：") }}{{ ('已启用' if github_write.enabled else '未启用') | ui }}{{ _("；固定仓库：") }}<code>{{ (github_write.repository or '未配置') | ui }}</code>。</p>
+<p class="small">{{ _("仅登记") }} <code>issue_write: create</code>{{ _("，网关要求独立凭据、工具定义摘要、会话绑定、资源授权、策略审批和写入前数据流检查。已批准工具定义摘要：") }}<code>{{ (github_write.schema_sha256 or '未配置') | ui }}</code>{{ _("。此处不显示 PAT；写入结果不明时不得自动重试。") }}</p></section>
+<section><h2>{{ _("最近远程调用") }}</h2><table><tr><th>{{ _("时间") }}</th><th>{{ _("工具") }}</th><th>{{ _("状态") }}</th><th>{{ _("调用证据") }}</th></tr>
+{% for call in recent %}<tr><td>{{ call.created_at }}</td><td>{{ call.tool }}</td><td>{{ (call.status) | ui }}</td><td><a href="/dashboard/calls/{{ call.call_id }}">{{ call.call_id }}</a></td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无远程 MCP 调用") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

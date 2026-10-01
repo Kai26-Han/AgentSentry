@@ -1,0 +1,29 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("故障隔离与恢复") }}{% endblock %}
+{% block title_text %}{{ _("故障隔离与恢复") }}{% endblock %}
+{% block content %}
+<h1>{{ _("故障隔离与恢复") }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 规则版本：") }}<code>{{ rules_version }}</code></p>
+<section><h2>{{ _("隔离规则") }}</h2><table><tr><th>{{ _("机制") }}</th><th>{{ _("触发条件") }}</th><th>{{ _("处置与恢复") }}</th></tr>
+<tr><td>{{ _("依赖熔断") }}</td><td>{{ _("同租户、同依赖连续失败 3 次") }}</td><td>{{ _("暂停 30 秒；冷却后只允许一次探测，成功才恢复。安全规则照常检查。") }}</td></tr>
+<tr><td>{{ _("并发上限") }}</td><td>{{ _("同依赖已有 2 个执行租约") }}</td><td>{{ _("拒绝新的依赖请求；本地其他工具继续运行。租约 120 秒后可回收。") }}</td></tr>
+<tr><td>{{ _("异步退避") }}</td><td>{{ _("Judge 或通知失败") }}</td><td>{{ _("指数退避，实际失败最多 3 次；Broker 故障不消耗分析次数。每租户每队列一批最多 20 条。") }}</td></tr>
+<tr><td>{{ _("关键依赖失败") }}</td><td>{{ _("身份／权限存储、审计或同步检查不可用") }}</td><td>{{ _("不放行新动作；不会切换到宽松模式。") }}</td></tr>
+<tr><td>{{ _("结果不明") }}</td><td>{{ _("请求可能发出但结果无法提交，或执行进程中断") }}</td><td>{{ _("保留 unknown，查询原调用并核对实际副作用；不自动重放。") }}</td></tr>
+</table><p>{{ _("进程存活检查：") }}<code>/health</code>{{ _("；数据库与权限存储就绪检查：") }}<code>/ready</code>{{ _("。Judge 及通知使用独立队列和 Worker；共用数据库、Redis 与主机的故障仍可能影响所有租户。") }}</p></section>
+<section><h2>{{ _("依赖状态") }}</h2><table><tr><th>{{ _("依赖") }}</th><th>{{ _("当前状态") }}</th><th>{{ _("连续失败") }}</th><th>{{ _("冷却截止") }}</th><th>{{ _("最近错误类别") }}</th></tr>
+{% for item in dependencies %}<tr><td><code>{{ item.dependency }}</code></td><td>{{ item.state }}</td><td>{{ item.failures }}</td><td>{{ item.open_until or '—' }}</td><td>{{ item.last_error or '—' }}</td></tr>
+{% else %}<tr><td colspan="5">{{ _("尚无受隔离依赖的调用；正常本地工具不建立熔断状态。") }}</td></tr>{% endfor %}</table></section>
+{% for queue in queues %}<section><h2>{{ ('Judge 分析' if queue.kind == 'judge' else 'Webhook 通知') | ui }}{{ _("队列") }}</h2>
+<p>{% for state,count in queue.counts.items() %}<code>{{ state }}</code> {{ count }}　{% else %}{{ _("暂无投递") }}{% endfor %} {{ _("· 最早待处理状态已持续") }} {{ queue.oldest_wait_seconds }} {{ _("秒（不代表队列的实时消费速度）") }}</p>
+<table><tr><th>{{ _("失败记录") }}</th><th>{{ _("实际尝试") }}</th><th>{{ _("错误类别") }}</th><th>{{ _("操作") }}</th></tr>
+{% for row in queue.failed %}<tr><td><code>{{ row.id }}</code></td><td>{{ row.attempts }}</td><td>{{ (row.error or '旧记录未提供安全错误类别') | ui }}</td><td><form method="post" action="/dashboard/resilience/{{ queue.kind }}/{{ row.id }}/retry"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("重试") }}{{ ('分析' if queue.kind == 'judge' else '通知') | ui }}</button></form></td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无终止重试的失败记录") }}</td></tr>{% endfor %}</table>
+<p>{{ _("仅重新投递信号，不执行工具。Judge 继续使用事件原先绑定的提供方。Webhook 是至少一次投递，接收方应按投递 ID 去重。") }}</p></section>{% endfor %}
+<section><h2>{{ _("结果不明的工具调用") }}</h2><table><tr><th>{{ _("调用证据") }}</th><th>{{ _("工具") }}</th><th>{{ _("处理要求") }}</th></tr>
+{% for call in unknown_calls %}<tr><td><a href="/dashboard/calls/{{ call.call_id }}">{{ call.call_id }}</a></td><td>{{ call.tool }}</td><td>{{ _("先核对原调用及实际副作用") }}</td></tr>{% else %}<tr><td colspan="3">{{ _("暂无 unknown 调用") }}</td></tr>{% endfor %}</table></section>
+<section><h2>{{ _("最近故障与恢复证据") }}</h2><table><tr><th>{{ _("时间") }}</th><th>{{ _("依赖") }}</th><th>{{ _("处置") }}</th><th>{{ _("原因类别") }}</th><th>{{ _("关联 ID") }}</th></tr>
+{% for event in events %}<tr><td>{{ event.created_at }}</td><td>{{ event.payload.dependency }}</td><td>{{ event.payload.action }}</td><td>{{ event.payload.reason }}</td><td><code>{{ event.payload.reference_id or '—' }}</code></td></tr>{% else %}<tr><td colspan="5">{{ _("暂无故障事件") }}</td></tr>{% endfor %}</table></section>
+<section><h2>{{ _("隔离故障实验") }}</h2><p>{{ _("实验使用独立临时数据库和受控替身；不关闭日常服务。此处保存的是当次实验报告，实验内部 ID 不作为日常调用链接。") }}</p>
+{% for run in lab_runs %}<details><summary>{{ run.created_at }} · {{ run.sample_version }} · {{ (run.status) | ui }} · {{ run.results|length }} {{ _("条") }}</summary><table><tr><th>{{ _("样本") }}</th><th>{{ _("验证内容") }}</th><th>{{ _("结论") }}</th><th>{{ _("证据") }}</th></tr>{% for item in run.results %}<tr><td>{{ item.id }}</td><td>{{ (item.name) | ui }}</td><td>{{ ('通过' if item.passed else '失败') | ui }}</td><td>{{ item.evidence }}</td></tr>{% endfor %}</table></details>{% else %}<p>{{ _("尚未保存实验报告；可运行") }} <code>agentsentry-fault-lab --persist</code>。</p>{% endfor %}</section>
+{% endblock %}

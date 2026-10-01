@@ -1,0 +1,12 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("工具调用策略") }}{% endblock %}
+{% block title_text %}{{ _("工具调用策略") }}{% endblock %}
+{% block content %}
+<h1>{{ _("防护规则 · 工具调用策略") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<p class="notice">{{ _("这里编辑的是单次工具调用的基础 YAML 策略。跨调用的行为检测与暂停规则请到") }}<a href="/dashboard/runtime-rules">{{ _("运行时安全规则") }}</a>{{ _("查看；该规则目录目前只读。") }}</p>
+<section><h2>{{ _("当前工具调用策略") }}</h2><p>{{ _("修订：") }}<code>{{ policy_revision }}</code>　{% if policy_reload == 'ok' %}{{ _("重载成功") }}{% elif policy_reload == 'failed' %}{{ _("校验失败，旧策略继续生效") }}{% endif %}</p>
+<form method="post" action="/dashboard/policy/reload"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("校验并热更新策略") }}</button></form>
+<table><tr><th>ID</th><th>{{ _("工具") }}</th><th>{{ _("效果") }}</th><th>{{ _("附加条件") }}</th></tr>
+{% for rule in policy_rules %}<tr><td>{{ rule.id }}</td><td>{{ rule.tool }}</td><td>{{ (rule.effect) | ui }}</td><td>{{ rule.argument_regex.pattern if rule.argument_regex else '' }}</td></tr>{% endfor %}</table>
+<h3>{{ _("编辑工具调用策略（YAML）") }}</h3><form method="post" action="/dashboard/policy/update"><input type="hidden" name="csrf" value="{{ csrf }}"><textarea name="yaml" rows="16" cols="85" required>{{ policy_source }}</textarea><br><button>{{ _("校验并保存生效") }}</button></form></section>
+{% endblock %}

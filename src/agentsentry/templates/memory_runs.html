@@ -1,0 +1,11 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("跨会话记忆实验") }}{% endblock %}
+{% block title_text %}{{ _("跨会话记忆实验") }}{% endblock %}
+{% block content %}
+<h1>{{ _("记忆实验 · 跨会话污染") }}</h1><p class="page-meta">{{ _("当前数据租户") }} <code>{{ tenant_id }}</code></p>
+{% if research_tenants %}<section><form method="get"><label>{{ _("研究租户") }} <select name="tenant"><option value="default">{{ _("默认租户") }}</option>{% for item in research_tenants %}<option value="{{ item.id }}" {% if item.id == tenant_id %}selected{% endif %}>{{ (item.name) | ui }}</option>{% endfor %}</select></label><button>{{ _("查看") }}</button></form></section>{% endif %}
+<section><p>{{ _("由") }} <code>agentsentry-memory-lab</code> {{ _("发起。固定与真实模型实验分开记录；中断运行不会生成完整结论。") }}</p>
+<table><tr><th>{{ _("开始时间") }}</th><th>{{ _("模式／模型") }}</th><th>{{ _("状态") }}</th><th>{{ _("样本") }}</th><th>{{ _("恶意记忆激活") }}</th><th>{{ _("延迟污染") }}</th><th>{{ _("正常可用") }}</th><th>{{ _("审计缺失") }}</th></tr>
+{% for run in runs %}<tr><td><a href="/dashboard/memory-runs/{{ run.id }}?tenant={{ tenant_id }}">{{ run.started_at }}</a></td><td>{{ run.mode }}／{{ (run.model_name or '无模型') | ui }}</td><td>{{ (run.status) | ui }}</td><td>{{ run.submitted_cases }}/{{ run.expected_cases }}</td><td>{{ run.counts.malicious_activated }}/{{ run.counts.attack_total }}</td><td>{{ run.counts.delayed_contamination }}</td><td>{{ run.counts.normal_usable }}/{{ run.counts.normal_total }}</td><td>{{ run.counts.audit_loss }}</td></tr>
+{% else %}<tr><td colspan="8">{{ _("当前租户没有跨会话实验记录。") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

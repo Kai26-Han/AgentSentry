@@ -1,0 +1,28 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("运行时安全规则") }}{% endblock %}
+{% block title_text %}{{ _("运行时安全规则") }}{% endblock %}
+{% block content %}
+<h1>{{ _("防护规则 · 运行时安全规则") }}</h1>
+<p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code> {{ _("· 生效规则版本：") }}<code>{{ rules_version }}</code> {{ _("· 会话绑定：") }}{{ ('强制校验' if runtime_binding_required else '兼容模式') | ui }}</p>
+<section>
+  <p>{{ _("规则目录只读。触发条件和处置来自网关当前代码；点击每行“查看”可读证据、局限与匹配表达式。具体命中见") }}<a href="/dashboard/runtime-sessions">{{ _("会话分析") }}</a>{{ _("和") }}<a href="/dashboard/alerts">{{ _("告警") }}</a>。</p>
+  <div class="table-wrap"><table class="rules-table">
+    <thead><tr><th scope="col">{{ _("规则名称") }}</th><th scope="col">{{ _("类别") }}</th><th scope="col">{{ _("适用范围") }}</th><th scope="col">{{ _("触发条件") }}</th><th scope="col">{{ _("处置") }}</th><th scope="col">{{ _("告警级别") }}</th><th scope="col">{{ _("更多信息") }}</th></tr></thead>
+    <tbody>{% for rule in rules %}
+    <tr id="{{ rule.id }}">
+      <th scope="row">{{ (rule.title) | ui }}</th>
+      <td>{{ (rule.category) | ui }}</td>
+      <td class="rule-scope">{{ (rule.scope) | ui }}</td>
+      <td class="rule-trigger">{{ (rule.trigger) | ui }}</td>
+      <td class="rule-effect">{{ (rule.effect) | ui }}</td>
+      <td>{{ ({'info':'仅线索','medium':'中','high':'高'}.get(rule.severity,rule.severity)) | ui }}</td>
+      <td class="rule-details"><details><summary>{{ _("查看") }}</summary><p><strong>{{ _("规则 ID：") }}</strong><code>{{ rule.id }}</code></p><p><strong>{{ _("证据：") }}</strong>{{ (rule.evidence) | ui }}</p><p><strong>{{ _("局限：") }}</strong>{{ (rule.limit) | ui }}</p>{% if rule.pattern %}<p><strong>{{ _("实际文字匹配表达式：") }}</strong></p><pre>{{ rule.pattern }}</pre>{% endif %}</details></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+<section><h2>{{ _("数据泄露防护规则") }}</h2><p>{{ _("模型请求、工具写入、回答与记忆检查的决定可在") }}<a href="/dashboard/data-flow">{{ _("敏感数据流") }}</a>{{ _("查看。以下规则只读。") }}</p>
+  <div class="table-wrap"><table class="rules-table"><thead><tr><th scope="col">{{ _("规则名称") }}</th><th scope="col">{{ _("类别") }}</th><th scope="col">{{ _("适用范围") }}</th><th scope="col">{{ _("触发条件") }}</th><th scope="col">{{ _("处置") }}</th><th scope="col">{{ _("告警级别") }}</th><th scope="col">{{ _("更多信息") }}</th></tr></thead><tbody>
+  {% for rule in data_flow_rules %}<tr id="{{ rule.id }}"><th scope="row">{{ (rule.title) | ui }}</th><td>{{ (rule.category) | ui }}</td><td>{{ (rule.scope) | ui }}</td><td>{{ (rule.trigger) | ui }}</td><td>{{ (rule.effect) | ui }}</td><td>{{ ({'info':'仅线索','medium':'中','high':'高'}.get(rule.severity,rule.severity)) | ui }}</td><td><details><summary>{{ _("查看") }}</summary><p>{{ _("规则 ID：") }}<code>{{ rule.id }}</code></p><p>{{ _("证据：") }}{{ (rule.evidence) | ui }}</p><p>{{ _("局限：") }}{{ (rule.limit) | ui }}</p></details></td></tr>{% endfor %}
+  </tbody></table></div></section>
+<details class="panel"><summary>{{ _("执行顺序与配置说明") }}</summary><p>{{ _("工具调用先经过身份、参数、基础策略和临时授权检查；通过后，网关根据本租户已记录的证据执行运行时安全规则，审批执行前再次检查。运行时安全规则只能维持或收紧基础策略。") }}</p><p>{{ _("这里的规则需要修改代码、测试并重新部署；") }}<a href="/dashboard/policy">{{ _("工具调用策略") }}</a>{{ _("的 YAML 不会修改它们。兼容模式下未上报会话只产生线索；强制绑定前须先升级可信适配层，再配置") }} <code>AGENTSENTRY_RUNTIME_BINDING_REQUIRED=true</code>。</p><p>{{ _("“仅线索”不自动生成运行时告警；中、高等级命中会进入告警页。规则命中不等于证明发生攻击。") }}</p></details>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("告警") }}{% endblock %}
+{% block title_text %}{{ _("告警") }}{% endblock %}
+{% block content %}
+<h1>{{ _("告警") }}</h1><p class="page-meta">{{ _("当前租户：") }}<code>{{ tenant_id }}</code></p>
+<section><h2>{{ _("告警") }}</h2><p class="small">{{ _("运行时安全规则在工具执行前处置；Judge 结果来自异步审计。确认告警不会恢复暂停的工具调用。框架编号仅表示可追溯的分类线索。") }}</p><table><tr><th>{{ _("时间") }}</th><th>{{ _("来源／级别") }}</th><th>{{ _("调用") }}</th><th>{{ _("风险") }}</th><th>{{ _("威胁映射") }}</th><th>{{ _("状态") }}</th></tr>
+{% for alert in alerts %}<tr><td>{{ alert.created_at }}</td><td>{{ alert.source }}<br><span class="danger">{{ alert.severity }}</span></td><td>{% if alert.call_id %}<a href="/dashboard/calls/{{ alert.call_id }}"><code>{{ alert.call_id }}</code></a>{% else %}{{ _("无关联调用") }}{% endif %}</td><td>{{ (alert.title) | ui }}{% if alert.occurrences > 1 %} · {{ alert.occurrences }} {{ _("次") }}{% endif %}</td><td>{% for threat_id in alert.threat_links %}<a href="/dashboard/threat-map/{{ alert.threat_assessment_id }}"><code>{{ threat_id }}</code></a>{% if not loop.last %}、{% endif %}{% else %}{{ ('待映射' if alert.mapping_status == 'pending' else '未映射（规则无匹配）' if alert.mapping_status == 'unmapped' else '无审计关联') | ui }}{% endfor %}</td><td>{{ alert.status }}{% if alert.status == 'open' %}<form method="post" action="{% if alert.source == 'Judge' %}/dashboard/alerts/{{ alert.id }}/ack{% elif alert.source == '数据泄露防护' %}/dashboard/data-flow-incidents/{{ alert.id }}/ack{% else %}/dashboard/runtime-incidents/{{ alert.id }}/ack{% endif %}"><input type="hidden" name="csrf" value="{{ csrf }}"><button>{{ _("确认") }}</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+<section><h2>{{ _("Judge 告警归并") }}</h2><p class="small">{{ _("相同来源、标签、事件类型和工具在冷却时间内归并为一组。运行时安全规则告警在上表按 Agent 与规则归并。") }}</p>
+<table><tr><th>{{ _("风险") }}</th><th>{{ _("工具") }}</th><th>{{ _("次数") }}</th><th>{{ _("最近出现") }}</th></tr>
+{% for group in alert_groups %}<tr><td>{{ group.provider }} / {{ group.labels | join(', ') }}</td><td>{{ group.tool or '-' }}</td><td>{{ group.occurrences }}</td><td>{{ group.last_seen_at }}</td></tr>
+{% else %}<tr><td colspan="4">{{ _("暂无") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

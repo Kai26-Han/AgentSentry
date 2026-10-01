@@ -1,0 +1,13 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ _("Agent 攻击实验") }}{% endblock %}
+{% block title_text %}{{ _("Agent 攻击实验") }}{% endblock %}
+{% block content %}
+<h1>{{ _("Agent 攻击实验") }}</h1><p class="page-meta">{{ _("当前数据租户：") }}<code>{{ tenant_id }}</code></p>
+<p class="notice">{{ _("固定用例重放工具提案；真实模型模式让示例 Agent 读取攻击内容。实验记录危险调用尝试、网关阻断、工具副作用和回答污染。此页展示结果；实验由本地命令启动。") }}</p>
+{% if research_tenants %}<section><p>{{ _("默认管理员可只读查看专用研究租户的实验记录。工具、审批和策略仍按各租户隔离。") }}</p>
+<form method="get" action="/dashboard/attack-runs"><label>{{ _("查看租户") }} <select name="tenant"><option value="default" {% if tenant_id == 'default' %}selected{% endif %}>{{ _("默认租户") }}</option>{% for item in research_tenants %}<option value="{{ item.id }}" {% if tenant_id == item.id %}selected{% endif %}>{{ (item.name) | ui }}</option>{% endfor %}</select></label><button>{{ _("查看") }}</button></form></section>{% endif %}
+<section><p>{{ _("启动命令：") }}<code>agentsentry-attack-lab</code>{{ _("。结果按租户保存；“中断”表示运行器未提交完成状态。") }}</p>
+<table><tr><th>{{ _("开始时间") }}</th><th>{{ _("模式 / 模型") }}</th><th>{{ _("状态") }}</th><th>{{ _("样本") }}</th><th>{{ _("攻击达成") }}</th><th>{{ _("正常完成") }}</th><th>{{ _("审计缺失") }}</th></tr>
+{% for run in runs %}<tr><td><a href="/dashboard/attack-runs/{{ run.id }}?tenant={{ tenant_id }}">{{ run.started_at }}</a></td><td>{{ run.mode }} / {{ (run.model_name or '无模型') | ui }}</td><td>{{ (run.status) | ui }}</td><td>{{ run.submitted_cases }}/{{ run.expected_cases }}</td><td>{{ run.counts.attack_succeeded }}/{{ run.counts.attack_total }}</td><td>{{ run.counts.normal_completed }}/{{ run.counts.normal_total }}</td><td>{{ run.counts.audit_loss }}</td></tr>
+{% else %}<tr><td colspan="7">{{ _("当前租户暂无实验记录。请检查上方选择的研究租户，或运行实验命令。") }}</td></tr>{% endfor %}</table></section>
+{% endblock %}

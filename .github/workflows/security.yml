@@ -1,0 +1,46 @@
+name: AgentSentry security regression
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  offline-security:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+      ADMIN_PASSWORD: test-admin-password
+      SESSION_SECRET: testing-session-secret-at-least-32-characters
+      AGENT_API_KEY: testing-agent-secret-at-least-32-characters
+      JUDGE_PROVIDER: mock
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned dependency manager
+        run: python -m pip install 'uv==0.11.24'
+      - name: Install locked runtime and test dependencies
+        run: uv sync --locked --extra test --no-install-project
+      - name: Run unit and tenant boundary tests
+        run: .venv/bin/python -m pytest -q
+      - name: Check threat framework mapping
+        run: .venv/bin/python scripts/check_threat_mapping.py --check
+      - name: Check personal learning task cards
+        run: .venv/bin/python scripts/check_learning_assessment.py --check
+      - name: Check separate English documentation and generated translations
+        run: .venv/bin/python scripts/check_english_docs.py --check
+      - name: Check pinned MCP transport dependencies
+        run: .venv/bin/python scripts/check_mcp_supply_chain.py
+      - name: Run security scenario corpus
+        run: .venv/bin/python -m agentsentry.evaluation --policy policies/default.yaml --cases evals/cases.jsonl --output /tmp/agentsentry-eval.json
+      - name: Check action chain scenarios
+        run: .venv/bin/python -m agentsentry.action_chain_lab --output /tmp/agentsentry-action-chain.json
+      - name: Check isolated failure scenarios
+        run: .venv/bin/python -m agentsentry.fault_lab --output /tmp/agentsentry-fault-lab.json
+      - name: Check restricted delegation scenarios
+        run: .venv/bin/python -m agentsentry.delegation_lab --report /tmp/agentsentry-delegation-lab.json
+      - name: Check policy decisions and rule coverage
+        run: .venv/bin/python -m agentsentry.policy_tests --policy policies/default.yaml --cases policy-tests/cases.yaml
